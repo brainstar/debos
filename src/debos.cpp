@@ -12,7 +12,7 @@
 Debos::Debos() {
 	this->resize(500,500);
 
-	QMenuBar* menubar = new QMenuBar(this);
+	QMenuBar* menubar = new QMenuBar();
 	QAction* action;
 	QMenu* menu;
 
@@ -40,8 +40,16 @@ Debos::Debos() {
 	action = menu->addAction("About debos...");
 	QObject::connect(action, SIGNAL(triggered()), this, SLOT(aboutDebos()));
 
-	GLDrawer *gl = new GLDrawer(this);
+	GLDrawer *gl = new GLDrawer();
 	gl->show();
+
+	QVBoxLayout* layout = new QVBoxLayout();
+	layout->addWidget(menubar);
+	layout->addWidget(gl, 1);
+	layout->setSpacing(0);
+	layout->setMargin(0);
+
+	this->setLayout(layout);
 
 	this->setWindowTitle("debos");
 
