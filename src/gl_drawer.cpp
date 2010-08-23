@@ -16,6 +16,15 @@ void GLDrawer::initializeGL() {
 	glDepthFunc(GL_LEQUAL);
 
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+	glEnable(GL_MAP1_VERTEX_3);
+
+	float a[3] = { -4.0, -4.0, 0.0 };
+	float b[3] = { 2.0, 4.0, 0.0 };
+	float c[3] = { -2.0, -4.0, 0.0 };
+	float d[3] = { 4.0, 4.0, 0.0 };
+
+	spline = new Spline(a, b, c, d);
 }
 
 void GLDrawer::resizeGL(int w, int h) {
@@ -35,21 +44,7 @@ void GLDrawer::resizeGL(int w, int h) {
 void GLDrawer::paintGL() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
+	glTranslatef(0.0f, 0.0f, -12.0f);
 
-	glTranslatef(-1.5f, 0.0f, -6.0f);
-
-	glBegin(GL_TRIANGLES);
-		glVertex3f(0.0f, 1.0f, 0.0f);
-		glVertex3f(-1.0f, -1.0f, 0.0f);
-		glVertex3f(1.0f, -1.0f, 0.0f);
-	glEnd();
-
-	glTranslatef(3.0f, 0.0f, 0.0f);
-
-	glBegin(GL_QUADS);
-		glVertex3f(-1.0f, 1.0f, 0.0f);
-		glVertex3f(1.0f, 1.0f, 0.0f);
-		glVertex3f(1.0f, -1.0f, 0.0f);
-		glVertex3f(-1.0f, -1.0f, 0.0f);
-	glEnd();
+	spline->draw();
 }

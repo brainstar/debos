@@ -11,10 +11,12 @@ QT += opengl
 # Input
 HEADERS += src/debos.h \
            src/gl_drawer.h \
+           src/spline.h \
            src/tinyxml/tinystr.h \
            src/tinyxml/tinyxml.h
 SOURCES += src/debos.cpp \
            src/gl_drawer.cpp \
+           src/spline.cpp \
            src/main.cpp \
            src/tinyxml/tinystr.cpp \
            src/tinyxml/tinyxml.cpp \
