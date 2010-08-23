@@ -40,7 +40,8 @@ Debos::Debos() {
 	action = menu->addAction("About debos...");
 	QObject::connect(action, SIGNAL(triggered()), this, SLOT(aboutDebos()));
 
-	GLDrawer *gl = new GLDrawer();
+	GLDrawer *gl = new GLDrawer(this);
+	gl->show();
 
 	this->setWindowTitle("debos");
 
