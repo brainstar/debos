@@ -7,8 +7,6 @@
 
 #include "gl_drawer.h"
 
-GLDrawer::GLDrawer(int timerInterval, QWidget* parent, char* name) : QGLWidget(parent, name) { }
-
 void GLDrawer::initializeGL() {
 	glShadeModel(GL_SMOOTH);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -21,8 +19,7 @@ void GLDrawer::initializeGL() {
 }
 
 void GLDrawer::resizeGL(int w, int h) {
-	if (h == 0)
-		h = 1;
+	h = h ? h : 1;
 
 	glViewport(0, 0, w, h);
 
@@ -46,6 +43,8 @@ void GLDrawer::paintGL() {
 		glVertex3f(-1.0f, -1.0f, 0.0f);
 		glVertex3f(1.0f, -1.0f, 0.0f);
 	glEnd();
+
+	glTranslatef(3.0f, 0.0f, 0.0f);
 
 	glBegin(GL_QUADS);
 		glVertex3f(-1.0f, 1.0f, 0.0f);
