@@ -34,7 +34,6 @@ public slots:
 signals:
 
 private:
-	TiXmlDocument* doc;
 	Document* data;
 	GLDrawer* gl;
 };

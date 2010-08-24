@@ -26,7 +26,7 @@ public:
 	LineObject* getLineObject();
 
 	bool save(string filename);
-	int load(string filename);
+	bool load(string filename);
 
 	void setGrid(float* bound);
 	float *getGrid() { return bounds; }
