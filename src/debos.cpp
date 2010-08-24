@@ -8,6 +8,7 @@
 #include "debos.h"
 #include "gl_drawer.h"
 #include <stdio.h>
+using namespace std;
 
 Debos::Debos() {
 	this->resize(500,500);
@@ -54,6 +55,23 @@ Debos::Debos() {
 	this->setWindowTitle("debos");
 
 	doc = NULL;
+	gl->data = data = new Document;
+
+	data->addSplineObject();
+	{
+		float a[3] = { -4.0, -4.0, 0.0 };
+		float b[3] = { -3.0, 4.0, 0.0 };
+		float c[3] = { 3.0, -4.0, 0.0 };
+		float d[3] = { 4.0, 4.0, 0.0 };
+		data->getSplineObject()->addSpline(a, b, c, d);
+	}
+	{
+		float a[3] = { 4.0, 4.0, 0.0 };
+		float b[3] = { 5.0, 8.0, 0.0 };
+		float c[3] = { -4.0, -4.0, 0.0 };
+		float d[3] = { -4.0, 0.0, 0.0 };
+		data->getSplineObject()->addSpline(a, b, c, d);
+	}
 }
 
 Debos::~Debos() {
@@ -104,4 +122,8 @@ void Debos::closeFile() {
 
 void Debos::aboutDebos() {
 	QMessageBox::information(this,"debos", "created by Christian Masser\n(c) 2010", "OK");
+}
+
+void Debos::draw() {
+	if (data) data->draw();
 }

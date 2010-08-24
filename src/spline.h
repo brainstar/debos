@@ -1,5 +1,6 @@
 #ifndef SPLINE_H
 #define SPLINE_H
+using namespace std;
 
 class Spline {
 public:
@@ -15,11 +16,13 @@ public:
 	void setk1(float *p);
 	void setk2(float *p);
 	void setb(float *p);
+	void setColor(float r, float g, float b);
 
 	void draw();
 
 private:
 	float points[4][3];
+	float col[3];
 };
 
 #endif
