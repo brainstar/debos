@@ -72,6 +72,23 @@ Debos::Debos() {
 		float d[3] = { -4.0, 0.0, 0.0 };
 		data->getSplineObject()->addSpline(a, b, c, d);
 	}
+	{
+		float a[3] = { -4.0, 0.0, 0.0 };
+		float b[3] = { -4.0, 4.0, 0.0 };
+		float c[3] = { 4.0, 4.0, 0.0 };
+		float d[3] = { 0.0, 8.0, 0.0 };
+		data->getSplineObject()->addSpline(a, b, c, d);
+	} 
+	data->addLineObject();
+	{
+		float a[3] = { -6.0, 6.0, 0.0 };
+		float b[3] = { 6.0, -6.0, 0.0 };
+		float c[3] = { -6.0, -6.0, 0.0 };
+		float d[3] = { -6.0, -5.0, 0.0 };
+		data->getLineObject()->addLine(a, b);
+		data->getLineObject()->addLine(b, c);
+		data->getLineObject()->addLine(c, d);
+	}
 }
 
 Debos::~Debos() {
