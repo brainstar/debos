@@ -99,6 +99,9 @@ Debos::Debos() {
 		data->setAuthor("brainstar");
 		data->setDescription("test document");
 	}
+
+	mode = VIEW;
+
 	gl->show();
 }
 
@@ -160,4 +163,37 @@ void Debos::aboutDebos() {
 
 void Debos::draw() {
 	if (data) data->draw();
+}
+
+void Debos::keyPressEvent( QKeyEvent *event ) {
+	if( event->key() == Qt::Key_V )
+		activateViewMode();
+	else if( event->key() == Qt::Key_S )
+		activateSplineMode();
+	else if( event->key() == Qt::Key_L )
+		activateLineMode();
+	else
+		QWidget::keyPressEvent( event ); // important, default key handling
+	
+}
+
+void Debos::activateViewMode() {
+	if(mode != VIEW) {
+		mode = VIEW;
+		qDebug("activating view mode");
+	}
+}
+
+void Debos::activateSplineMode() {
+	if(mode != SPLINE) {
+		mode = SPLINE;
+		qDebug("activating spline mode");
+	}
+}
+
+void Debos::activateLineMode() {
+	if(mode != LINE) {
+		mode = LINE;
+		qDebug("activating line mode");
+	}
 }

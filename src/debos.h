@@ -10,10 +10,17 @@
 
 #include <Qt/qwidget.h>
 #include <QtGui/QtGui>
+#include <QKeyEvent>
 #include "tinyxml/tinyxml.h"
 #include "document.h"
 #include "gl_drawer.h"
 using namespace std;
+
+enum Mode {
+	VIEW,
+	SPLINE,
+	LINE
+};
 
 class Debos : public QWidget {
 Q_OBJECT;
@@ -28,8 +35,14 @@ public slots:
 	void exportFile();
 	void closeFile();
 	void aboutDebos();
+	void activateViewMode();
+	void activateSplineMode();
+	void activateLineMode();
 
 	void draw();
+
+protected:
+	void keyPressEvent( QKeyEvent * event );
 
 signals:
 
@@ -37,6 +50,7 @@ private:
 	TiXmlDocument* doc;
 	Document* data;
 	GLDrawer* gl;
+	Mode mode;
 };
 
 #endif /* DEBOS_H_ */
