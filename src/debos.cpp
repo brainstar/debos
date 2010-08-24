@@ -6,7 +6,6 @@
  */
 
 #include "debos.h"
-#include "gl_drawer.h"
 #include <stdio.h>
 using namespace std;
 
@@ -45,7 +44,7 @@ Debos::Debos() {
 	action = menu->addAction("About debos...");
 	connect(action, SIGNAL(triggered()), this, SLOT(aboutDebos()));
 
-	GLDrawer *gl = new GLDrawer();
+	gl = new GLDrawer();
 	gl->show();
 
 	QVBoxLayout* layout = new QVBoxLayout();
@@ -129,8 +128,9 @@ void Debos::loadFile() {
 
 void Debos::exportFile() {
 	if (doc) {
-		QString filename = QFileDialog::getSaveFileName(this, "Export File", "~", "PNG (*.png)");
-		if (!filename.isEmpty()); // do nothing yet
+		QString filename = QFileDialog::getSaveFileName(this, "Export File", "~", "Jpeg (*.jpg)");
+		if (!filename.isEmpty())
+			gl->getScreen().save( filename, "jpg" );
 	}
 }
 

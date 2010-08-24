@@ -41,3 +41,7 @@ void GLDrawer::paintGL() {
 
 	data->draw();
 }
+
+QImage GLDrawer::getScreen() {
+	return grabFrameBuffer ( false ); // false = no alpha
+}
