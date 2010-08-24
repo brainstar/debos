@@ -9,6 +9,7 @@
 #define GL_DRAWER_H
 
 #include <QtOpenGL/qgl.h>
+#include <QImage>
 #include "document.h"
 using namespace std;
 
@@ -16,9 +17,10 @@ class GLDrawer : public QGLWidget {
 Q_OBJECT
 
 public:
-	GLDrawer (QWidget *parent = 0, char *name = 0) : QGLWidget(parent) { }
-	~GLDrawer () { };
-	Document* data;	
+	GLDrawer(QWidget *parent = 0, char *name = 0);
+	~GLDrawer();
+	QImage getScreen();
+	Document* data;
 	float* grid;
 
 protected:
