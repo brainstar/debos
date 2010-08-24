@@ -35,11 +35,17 @@ void GLDrawer::resizeGL(int w, int h) {
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+	
+	float foo[4] = {-10.0, 10.0, -10.0, 10.0 };
+	float *g = foo;
+	if (data) {
+		g = data->getGrid();
+	}
 
 	if (w > h)
-		glOrtho(*grid * (GLfloat) w / (GLfloat) h, *(grid + 1) * (GLfloat) w / (GLfloat) h, *(grid + 2), *(grid + 3), 1.0, -1.0);
+		glOrtho(*g * (GLfloat) w / (GLfloat) h, *(g + 1) * (GLfloat) w / (GLfloat) h, *(g + 2), *(g + 3), 1.0, -1.0);
 	else
-		glOrtho(*grid, *(grid + 1), *(grid + 2) * (GLfloat) h / (GLfloat) w, *(grid + 3) * (GLfloat) h / (GLfloat) w, 1.0, -1.0);
+		glOrtho(*g, *(g + 1), *(g + 2) * (GLfloat) h / (GLfloat) w, *(g + 3) * (GLfloat) h / (GLfloat) w, 1.0, -1.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -49,7 +55,8 @@ void GLDrawer::paintGL() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
-	data->draw();
+	if (data)
+		data->draw();
 }
 
 QImage GLDrawer::getScreen() {

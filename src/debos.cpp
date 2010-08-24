@@ -56,7 +56,6 @@ Debos::Debos() {
 
 	this->setWindowTitle("debos");
 
-	doc = NULL;
 	gl->data = data = new Document;
 
 	data->addSplineObject();
@@ -69,7 +68,7 @@ Debos::Debos() {
 	}
 	{
 		float a[3] = { 4.0, 4.0, 0.0 };
-		float b[3] = { 5.0, 8.0, 0.0 };
+		float b[3] = { 5.0, 12.0, 0.0 };
 		float c[3] = { -4.0, -4.0, 0.0 };
 		float d[3] = { -4.0, 0.0, 0.0 };
 		data->getSplineObject()->addSpline(a, b, c, d);
@@ -106,43 +105,28 @@ Debos::Debos() {
 }
 
 Debos::~Debos() {
-	delete doc;
-	doc = NULL;
 }
 
 void Debos::newFile() {
-	if (doc)
-		delete doc;
-	doc = new TiXmlDocument;
 }
 
 void Debos::loadFile() {
-	QString filename = QFileDialog::getOpenFileName(this, "Open File", "~", "XML Files (*.xml)");
+	QString filename = QFileDialog::getOpenFileName(this, "Open File", "test.xml", "XML Files (*.xml)");
+	Document *doc = new Document;
 	if (!filename.isEmpty()) {
-		if (doc)
-			delete doc;
-		doc = new TiXmlDocument(filename.toStdString().c_str());
-		if (doc->LoadFile()) {
-			//TODO: Loading File-Code comes here
+		if (doc->load(filename.toStdString())) {
+			delete data;
+			gl->data = data = doc;
 		}
-		else {
-			QMessageBox msgBox;
-			msgBox.setText("Error parsing file!");
-			msgBox.setStandardButtons(QMessageBox::Ok);
-			msgBox.setIcon(QMessageBox::Warning);
-			msgBox.exec();
+		else
 			delete doc;
-			doc = NULL;
-		}
 	}
 }
 
 void Debos::exportFile() {
-	if (doc) {
-		QString filename = QFileDialog::getSaveFileName(this, "Export File", "~", "Jpeg (*.jpg)");
-		if (!filename.isEmpty())
-			gl->getScreen().save( filename, "jpg" );
-	}
+	QString filename = QFileDialog::getSaveFileName(this, "Export File", "~", "png (*.png)");
+	if (!filename.isEmpty())
+		gl->getScreen().save( filename, "png" );
 }
 
 void Debos::saveFile() {
@@ -152,9 +136,9 @@ void Debos::saveFile() {
 }
 
 void Debos::closeFile() {
-	if (doc)
-		delete doc;
-	doc = NULL;
+	delete data;
+	gl->data = data = 0;
+	gl->hide();
 }
 
 void Debos::aboutDebos() {
