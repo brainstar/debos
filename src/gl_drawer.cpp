@@ -23,13 +23,17 @@ void GLDrawer::initializeGL() {
 
 void GLDrawer::resizeGL(int w, int h) {
 	h = h ? h : 1;
+	w = w ? w : 1;
 
 	glViewport(0, 0, w, h);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	glOrtho(-10.0 * (GLfloat) w / (GLfloat) h, 10.0 * (GLfloat) w / (GLfloat) h, -10.0, 10.0, 1.0, -1.0);
+	if (w > h)
+		glOrtho(*grid * (GLfloat) w / (GLfloat) h, *(grid + 1) * (GLfloat) w / (GLfloat) h, *(grid + 2), *(grid + 3), 1.0, -1.0);
+	else
+		glOrtho(*grid, *(grid + 1), *(grid + 2) * (GLfloat) h / (GLfloat) w, *(grid + 3) * (GLfloat) h / (GLfloat) w, 1.0, -1.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

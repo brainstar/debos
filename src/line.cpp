@@ -18,6 +18,14 @@ Line::Line(float *x, float *y) {
 	col[0] = col[1] = col[2] = 1.0;
 }
 
+float* Line::geta() {
+	return a;
+}
+
+float* Line::getb() {
+	return b;
+}
+
 void Line::setColor(float r, float g, float b) {
 	col[0] = r;
 	col[1] = g;

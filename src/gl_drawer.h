@@ -19,6 +19,7 @@ public:
 	GLDrawer (QWidget *parent = 0, char *name = 0) : QGLWidget(parent) { }
 	~GLDrawer () { };
 	Document* data;	
+	float* grid;
 
 protected:
 	void initializeGL();

@@ -11,6 +11,8 @@ void SplineObject::addSpline(float *a, float *k1, float *k2, float *b) {
 	splines.push_back(spline);
 	for (list<Spline>::iterator it = splines.begin(); it != splines.end(); it++)
 		it->setColor(1.0, 1.0, 1.0);
+	if (iter != splines.end())
+		iter->setColor(1.0, 1.0, 1.0);
 	iter = splines.end();
 	iter--;
 	iter->setColor(1.0, 0.0, 1.0);

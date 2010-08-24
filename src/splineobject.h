@@ -18,8 +18,10 @@ public:
 	void nextSpline();
 	void prevSpline();
 
-private:
+	void iterToEnd() { iter = splines.end(); }
+
 	list<Spline> splines;
+private:
 	list<Spline>::iterator iter;
 };
 

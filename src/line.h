@@ -9,6 +9,9 @@ public:
 	Line(float *x, float *y);
 	~Line() { };
 
+	float* geta();
+	float* getb();
+
 	void setColor(float r, float g, float b);
 
 	void draw();

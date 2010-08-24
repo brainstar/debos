@@ -42,7 +42,6 @@ Debos::Debos() {
 	QObject::connect(action, SIGNAL(triggered()), this, SLOT(aboutDebos()));
 
 	GLDrawer *gl = new GLDrawer();
-	gl->show();
 
 	QVBoxLayout* layout = new QVBoxLayout();
 	layout->addWidget(menubar);
@@ -89,6 +88,15 @@ Debos::Debos() {
 		data->getLineObject()->addLine(b, c);
 		data->getLineObject()->addLine(c, d);
 	}
+	
+	{
+		float bounds[4] = { -10.0, 10.0, -10.0, 10.0 };
+		data->setGrid(bounds);
+		gl->grid = data->getGrid();
+		data->setAuthor("brainstar");
+		data->setDescription("test document");
+	}
+	gl->show();
 }
 
 Debos::~Debos() {
@@ -124,11 +132,9 @@ void Debos::loadFile() {
 }
 
 void Debos::saveFile() {
-	if (doc) {
-		QString filename = QFileDialog::getSaveFileName(this, "Save File", "~", "XML Files (*.xml)");
-		if (!filename.isEmpty()) 
-			doc->SaveFile(filename.toStdString().c_str());
-	}
+	QString filename = QFileDialog::getSaveFileName(this, "Save File", "test.xml", "XML Files (*.xml)");
+	if (!filename.isEmpty()) 
+		data->save(filename.toStdString());
 }
 
 void Debos::closeFile() {

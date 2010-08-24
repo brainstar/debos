@@ -18,8 +18,11 @@ public:
 	void nextLine();
 	void prevLine();
 
-private:
+	void iterToEnd() { iter = lines.end(); }
+
 	list<Line> lines;
+
+private:
 	list<Line>::iterator iter;
 };
 
