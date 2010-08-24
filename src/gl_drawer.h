@@ -9,7 +9,7 @@
 #define GL_DRAWER_H
 
 #include <QtOpenGL/qgl.h>
-#include "spline.h"
+#include "document.h"
 using namespace std;
 
 class GLDrawer : public QGLWidget {
@@ -17,15 +17,13 @@ Q_OBJECT
 
 public:
 	GLDrawer (QWidget *parent = 0, char *name = 0) : QGLWidget(parent) { }
-	~GLDrawer () { if (spline) delete spline; }
+	~GLDrawer () { };
+	Document* data;	
 
 protected:
 	void initializeGL();
 	void resizeGL(int w, int h);
 	void paintGL();
-
-private:
-	Spline *spline;
 };
 
 #endif

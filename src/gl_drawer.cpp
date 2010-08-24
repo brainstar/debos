@@ -6,6 +6,7 @@
  */
 
 #include "gl_drawer.h"
+using namespace std;
 
 void GLDrawer::initializeGL() {
 	glShadeModel(GL_SMOOTH);
@@ -18,13 +19,6 @@ void GLDrawer::initializeGL() {
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	glEnable(GL_MAP1_VERTEX_3);
-
-	float a[3] = { -4.0, -4.0, 0.0 };
-	float b[3] = { 2.0, 4.0, 0.0 };
-	float c[3] = { -2.0, -4.0, 0.0 };
-	float d[3] = { 4.0, 4.0, 0.0 };
-
-	spline = new Spline(a, b, c, d);
 }
 
 void GLDrawer::resizeGL(int w, int h) {
@@ -46,5 +40,5 @@ void GLDrawer::paintGL() {
 	glLoadIdentity();
 	glTranslatef(0.0f, 0.0f, -12.0f);
 
-	spline->draw();
+	data->draw();
 }

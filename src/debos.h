@@ -11,6 +11,8 @@
 #include <Qt/qwidget.h>
 #include <QtGui/QtGui>
 #include "tinyxml/tinyxml.h"
+#include "document.h"
+using namespace std;
 
 class Debos : public QWidget {
 Q_OBJECT;
@@ -25,10 +27,13 @@ public slots:
 	void closeFile();
 	void aboutDebos();
 
+	void draw();
+
 signals:
 
 private:
 	TiXmlDocument* doc;
+	Document* data;
 };
 
 #endif /* DEBOS_H_ */
