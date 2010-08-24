@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<debos>
+    <info>
+        <author>brainstar</author>
+        <description>This is an example file to show the data structure of debos</description>
+        <version>0.1pre4</version>
+    </info>
+    <objects>
+        <curve>
+            <pointpair id="1" x1="0" y1="0" x2="1" y2="1" />
+            <pointpair id="2" x1="2" y1="1" x2="3" y2="4" />
+        </curve>
+        <line>
+            <point id="1" x="5" y="5" />
+            <point id="2" x="7" y="8" />
+        </line>
+    </objects>
+    <grid>
+        <x-axis lower="-5" upper="5" />
+        <y-axis lower="-5" upper="5" />
+    </grid>
+</debos>
