@@ -48,6 +48,7 @@ Debos::Debos() {
 
 	QVBoxLayout* layout = new QVBoxLayout();
 	layout->addWidget(menubar);
+	layout->addStretch(0.5);
 	layout->addWidget(gl, 1);
 	layout->setSpacing(0);
 	layout->setMargin(0);
@@ -108,6 +109,10 @@ Debos::~Debos() {
 }
 
 void Debos::newFile() {
+	gl->hide();
+	delete data;
+	gl->data = data = new Document;
+	gl->show();
 }
 
 void Debos::loadFile() {
@@ -117,6 +122,7 @@ void Debos::loadFile() {
 		if (doc->load(filename.toStdString())) {
 			delete data;
 			gl->data = data = doc;
+			gl->show();
 		}
 		else
 			delete doc;
