@@ -24,6 +24,7 @@ public slots:
 	void newFile();
 	void loadFile();
 	void saveFile();
+	void exportFile();
 	void closeFile();
 	void aboutDebos();
 
