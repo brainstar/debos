@@ -47,7 +47,6 @@ protected:
 signals:
 
 private:
-	TiXmlDocument* doc;
 	Document* data;
 	GLDrawer* gl;
 	Mode mode;
