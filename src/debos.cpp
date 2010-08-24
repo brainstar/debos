@@ -20,26 +20,30 @@ Debos::Debos() {
 	menu = menubar->addMenu("File");
 
 	action = menu->addAction("New");
-	QObject::connect(action, SIGNAL(triggered()), this, SLOT(newFile()));
+	connect(action, SIGNAL(triggered()), this, SLOT(newFile()));
 	menu->addSeparator();
 
 	action = menu->addAction("Save...");
-	QObject::connect(action, SIGNAL(triggered()), this, SLOT(saveFile()));
+	connect(action, SIGNAL(triggered()), this, SLOT(saveFile()));
+
+	action = menu->addAction("Export...");
+	connect(action, SIGNAL(triggered()), this, SLOT(exportFile()));
+
 	action = menu->addAction("Load...");
-	QObject::connect(action, SIGNAL(triggered()), this, SLOT(loadFile()));
+	connect(action, SIGNAL(triggered()), this, SLOT(loadFile()));
 	menu->addSeparator();
 
 	action = menu->addAction("Close");
-	QObject::connect(action, SIGNAL(triggered()), this, SLOT(closeFile()));
+	connect(action, SIGNAL(triggered()), this, SLOT(closeFile()));
 	menu->addSeparator();
 
 	action = menu->addAction("Quit");
-	QObject::connect(action, SIGNAL(triggered()), qApp, SLOT(quit()));
+	connect(action, SIGNAL(triggered()), qApp, SLOT(quit()));
 
 	menu = menubar->addMenu("?");
 
 	action = menu->addAction("About debos...");
-	QObject::connect(action, SIGNAL(triggered()), this, SLOT(aboutDebos()));
+	connect(action, SIGNAL(triggered()), this, SLOT(aboutDebos()));
 
 	GLDrawer *gl = new GLDrawer();
 	gl->show();
@@ -120,6 +124,13 @@ void Debos::loadFile() {
 			delete doc;
 			doc = NULL;
 		}
+	}
+}
+
+void Debos::exportFile() {
+	if (doc) {
+		QString filename = QFileDialog::getSaveFileName(this, "Export File", "~", "PNG (*.png)");
+		if (!filename.isEmpty()); // do nothing yet
 	}
 }
 
