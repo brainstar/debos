@@ -12,6 +12,7 @@
 #include <QtGui/QtGui>
 #include "tinyxml/tinyxml.h"
 #include "document.h"
+#include "gl_drawer.h"
 using namespace std;
 
 class Debos : public QWidget {
@@ -24,6 +25,7 @@ public slots:
 	void newFile();
 	void loadFile();
 	void saveFile();
+	void exportFile();
 	void closeFile();
 	void aboutDebos();
 
@@ -34,6 +36,7 @@ signals:
 private:
 	TiXmlDocument* doc;
 	Document* data;
+	GLDrawer* gl;
 };
 
 #endif /* DEBOS_H_ */
