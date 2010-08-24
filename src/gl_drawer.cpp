@@ -8,6 +8,12 @@
 #include "gl_drawer.h"
 using namespace std;
 
+GLDrawer::GLDrawer(QWidget *parent, char *name) : QGLWidget(parent) {
+}
+
+GLDrawer::~GLDrawer() {
+}
+
 void GLDrawer::initializeGL() {
 	glShadeModel(GL_SMOOTH);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);

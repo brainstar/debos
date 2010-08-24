@@ -17,8 +17,8 @@ class GLDrawer : public QGLWidget {
 Q_OBJECT
 
 public:
-	GLDrawer (QWidget *parent = 0, char *name = 0) : QGLWidget(parent) { }
-	~GLDrawer () { };
+	GLDrawer(QWidget *parent = 0, char *name = 0);
+	~GLDrawer();
 	QImage getScreen();
 	Document* data;
 
