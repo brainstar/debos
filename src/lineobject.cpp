@@ -60,7 +60,8 @@ void LineObject::addPoint(float x, float y, float z) {
 void LineObject::nextLine() {
 	if (iter != lines.end()) {
 		iter->setColor(1.0, 1.0, 1.0);
-		if (iter != lines.begin()) iter++;
+		iter++;
+		if (iter == lines.end()) iter--;
 		iter->setColor(1.0, 0.0, 1.0);
 	}
 }

@@ -209,6 +209,20 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				data->deleteLineObject();
 				qDebug("removed LineObject");
 			}
+			else if (event->key() == Qt::Key_Left) {
+				if (data->getLineObject())
+					data->getLineObject()->prevLine();
+			}
+			else if (event->key() == Qt::Key_Right) {
+				if (data->getLineObject())
+					data->getLineObject()->nextLine();
+			}
+			else if (event->key() == Qt::Key_Down) {
+				data->prevLineObject();
+			}
+			else if (event->key() == Qt::Key_Up) {
+				data->nextLineObject();
+			}
 			else if (event->key() == Qt::Key_Delete && data->getLineObject()) {
 				data->getLineObject()->deleteLine();
 				qDebug("removed Line");
@@ -217,6 +231,7 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 	}
 
 	QWidget::keyPressEvent( event ); // important, default key handling
+	gl->updateGL();
 }
 
 void Debos::activateViewMode() {
