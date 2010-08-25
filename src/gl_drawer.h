@@ -21,12 +21,14 @@ public:
 	~GLDrawer();
 	QImage getScreen();
 	Document* data;
-	float* grid;
 
 protected:
 	void initializeGL();
 	void resizeGL(int w, int h);
 	void paintGL();
+
+private:
+	float display[4]; // current size of the display, bigger than the size defined in data
 };
 
 #endif

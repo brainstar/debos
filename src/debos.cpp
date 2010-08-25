@@ -95,7 +95,6 @@ Debos::Debos() {
 	{
 		float bounds[4] = { -10.0, 10.0, -10.0, 10.0 };
 		data->setGrid(bounds);
-		gl->grid = data->getGrid();
 		data->setAuthor("brainstar");
 		data->setDescription("test document");
 	}
@@ -142,9 +141,9 @@ void Debos::saveFile() {
 }
 
 void Debos::closeFile() {
+	gl->hide();
 	delete data;
 	gl->data = data = 0;
-	gl->hide();
 }
 
 void Debos::aboutDebos() {
@@ -155,13 +154,34 @@ void Debos::draw() {
 	if (data) data->draw();
 }
 
-void Debos::keyPressEvent( QKeyEvent *event ) {
+void Debos::mouseClick(float x, float y) {
+	if (mode == VIEW)
+		mouseClickView(x, y);
+	else if (mode == SPLINE)
+		mouseClickSpline(x, y);
+	else if (mode == LINE)
+		mouseClickLine(x, y);
+}
+
+void Debos::keyPressEvent(QKeyEvent *event) {
 	if( event->key() == Qt::Key_V )
 		activateViewMode();
 	else if( event->key() == Qt::Key_S )
 		activateSplineMode();
 	else if( event->key() == Qt::Key_L )
 		activateLineMode();
+
+	else if (event->key() == Qt::Key_N) {
+		if (mode == SPLINE) {
+			data->addSplineObject();
+			qDebug("adding SplineObject");
+		}
+		else if (mode == LINE) {
+			data->addLineObject();
+			qDebug("adding LineObject");
+		}
+	}
+
 	else
 		QWidget::keyPressEvent( event ); // important, default key handling
 	
@@ -186,4 +206,17 @@ void Debos::activateLineMode() {
 		mode = LINE;
 		qDebug("activating line mode");
 	}
+}
+
+void Debos::mouseClickView(float x, float y) {
+}
+
+void Debos::mouseClickSpline(float x, float y) {
+	SplineObject *so;
+	if (so = data->getSplineObject()) {
+		so->addPoint(x, y, 0.0);	
+	}
+}
+
+void Debos::mouseClickLine(float x, float y) {
 }

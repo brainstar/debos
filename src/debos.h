@@ -41,12 +41,18 @@ public slots:
 
 	void draw();
 
+	void mouseClick(float x, float y);
+
 protected:
-	void keyPressEvent( QKeyEvent * event );
+	void keyPressEvent(QKeyEvent *event);
 
 signals:
 
 private:
+	void mouseClickView(float x, float y);
+	void mouseClickSpline(float x, float y);
+	void mouseClickLine(float x, float y);
+
 	Document* data;
 	GLDrawer* gl;
 	Mode mode;

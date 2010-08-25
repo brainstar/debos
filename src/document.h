@@ -9,7 +9,8 @@ using namespace std;
 
 class Document {
 public:
-	Document() { so_iter = spline_objects.end(); }
+//	Document() { so_iter = spline_objects.end(); }
+	Document();
 
 	void draw();
 	
@@ -38,7 +39,6 @@ private:
 	list<LineObject> line_objects;
 	list<LineObject>::iterator l_iter;
 
-	TiXmlDocument doc;
 	float bounds[4];
 	string author, description;
 };
