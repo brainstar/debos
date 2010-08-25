@@ -10,6 +10,7 @@
 
 #include <QtOpenGL/qgl.h>
 #include <QImage>
+#include <QMouseEvent>
 #include "document.h"
 using namespace std;
 
@@ -22,11 +23,14 @@ public:
 	QImage getScreen();
 	Document* data;
 
+signals:
+	void mouseClicked( float x, float y );
+
 protected:
 	void initializeGL();
 	void resizeGL(int w, int h);
 	void paintGL();
-
+	void mousePressEvent( QMouseEvent *event );
 private:
 	float display[4]; // current size of the display, bigger than the size defined in data
 };
