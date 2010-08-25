@@ -36,9 +36,7 @@ public slots:
 	void exportFile();
 	void closeFile();
 	void aboutDebos();
-	void activateViewMode();
-	void activateSplineMode();
-	void activateLineMode();
+	void activateMode(Mode pMode);
 
 	void draw();
 

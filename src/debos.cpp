@@ -162,11 +162,11 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 	}
 	else {
 		if(event->key() == Qt::Key_V)
-			activateViewMode();
+			activateMode(VIEW);
 		else if(event->key() == Qt::Key_S)
-			activateSplineMode();
+			activateMode(SPLINE);
 		else if(event->key() == Qt::Key_L)
-			activateLineMode();
+			activateMode(LINE);
 
 		else if (mode == VIEW) {
 			if (event->key() == Qt::Key_Left) {
@@ -230,24 +230,10 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 	
 }
 
-void Debos::activateViewMode() {
-	if(mode != VIEW) {
-		mode = VIEW;
-		qDebug("activating view mode");
-	}
-}
-
-void Debos::activateSplineMode() {
-	if(mode != SPLINE) {
-		mode = SPLINE;
-		qDebug("activating spline mode");
-	}
-}
-
-void Debos::activateLineMode() {
-	if(mode != LINE) {
-		mode = LINE;
-		qDebug("activating line mode");
+void Debos::activateMode(Mode pMode) {
+	if(mode != pMode) {
+		mode = pMode;
+		qDebug("activating mode %d", mode);
 	}
 }
 
