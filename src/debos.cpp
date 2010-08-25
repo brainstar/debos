@@ -64,6 +64,8 @@ Debos::Debos() {
 		newFile();
 	}
 
+	connect( gl, SIGNAL(mouseClicked(float, float)), this, SLOT(mouseClick(float, float)) );
+
 	gl->show();	
 }
 
@@ -135,6 +137,7 @@ void Debos::draw() {
 }
 
 void Debos::mouseClick(float x, float y) {
+	qDebug("clicked view at %f, %f", x, y);
 	if (mode == VIEW)
 		mouseClickView(x, y);
 	else if (mode == SPLINE)
@@ -150,11 +153,11 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 	}
 	else {
 		if(event->key() == Qt::Key_V)
-			activateViewMode();
+			activateMode(VIEW);
 		else if(event->key() == Qt::Key_S)
-			activateSplineMode();
+			activateMode(SPLINE);
 		else if(event->key() == Qt::Key_L)
-			activateLineMode();
+			activateMode(LINE);
 
 		else if (mode == VIEW) {
 			if (event->key() == Qt::Key_Left) {
@@ -234,24 +237,10 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 	gl->updateGL();
 }
 
-void Debos::activateViewMode() {
-	if(mode != VIEW) {
-		mode = VIEW;
-		qDebug("activating view mode");
-	}
-}
-
-void Debos::activateSplineMode() {
-	if(mode != SPLINE) {
-		mode = SPLINE;
-		qDebug("activating spline mode");
-	}
-}
-
-void Debos::activateLineMode() {
-	if(mode != LINE) {
-		mode = LINE;
-		qDebug("activating line mode");
+void Debos::activateMode(Mode pMode) {
+	if(mode != pMode) {
+		mode = pMode;
+		qDebug("activating mode %d", mode);
 	}
 }
 

@@ -71,3 +71,8 @@ void GLDrawer::paintGL() {
 QImage GLDrawer::getScreen() {
 	return grabFrameBuffer ( false ); // false = no alpha
 }
+
+void GLDrawer::mousePressEvent ( QMouseEvent * event ) {
+	emit mouseClicked( event->x(), event->y() );
+	QGLWidget::mousePressEvent( event );
+}
