@@ -159,31 +159,67 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 			newFile();
 	}
 	else {
-		if( event->key() == Qt::Key_V )
+		if(event->key() == Qt::Key_V)
 			activateViewMode();
-		else if( event->key() == Qt::Key_S )
+		else if(event->key() == Qt::Key_S)
 			activateSplineMode();
-		else if( event->key() == Qt::Key_L )
+		else if(event->key() == Qt::Key_L)
 			activateLineMode();
 
-		else if (event->key() == Qt::Key_N) {
-			if (mode == SPLINE) {
+		else if (mode == VIEW) {
+			if (event->key() == Qt::Key_Left) {
+			//TODO: Move visible area to the left
+			}
+			else if (event->key() == Qt::Key_Right) {
+			//TODO: Move visible area to the right
+			}
+			else if (event->key() == Qt::Key_Down) {
+			//TODO: Move visible area downwards
+			}
+			else if (event->key() == Qt::Key_Up) {
+			//TODO: Move visible area upwards
+			}
+		}
+		else if (mode == SPLINE) {
+			if (event->key() == Qt::Key_N) {
 				data->addSplineObject();
 				qDebug("adding SplineObject");
 			}
-			else if (mode == LINE) {
-				data->addLineObject();
-				qDebug("adding LineObject");
+			else if (event->key() == Qt::Key_X) {
+				data->deleteSplineObject();
+				qDebug("removed SplineObject");
+			}
+			else if (event->key() == Qt::Key_Left) {
+				if (data->getSplineObject())
+					data->getSplineObject()->prevSpline();
+			}
+			else if (event->key() == Qt::Key_Right) {
+				if (data->getSplineObject())
+					data->getSplineObject()->nextSpline();
+			}
+			else if (event->key() == Qt::Key_Down) {
+				data->prevSplineObject();
+			}
+			else if (event->key() == Qt::Key_Up) {
+				data->nextSplineObject();
+			}
+			else if (event->key() == Qt::Key_Delete && data->getSplineObject()) {
+				data->getSplineObject()->deleteSpline();
+				qDebug("removed Spline");
 			}
 		}
-		else if (event->key() == Qt::Key_Delete) {
-			if (mode == SPLINE && data->getSplineObject()) {
-					data->getSplineObject()->deleteSpline();
-				qDebug("deleting Spline");
+		else if (mode == LINE) {
+			if (event->key() == Qt::Key_N) {
+				data->addSplineObject();
+				qDebug("adding LineObject");
 			}
-			else if (mode == LINE && data->getLineObject()) {
+			else if (event->key() == Qt::Key_X) {
+				data->deleteLineObject();
+				qDebug("removed LineObject");
+			}
+			else if (event->key() == Qt::Key_Delete && data->getLineObject()) {
 				data->getLineObject()->deleteLine();
-				qDebug("deleting Line");
+				qDebug("removed Line");
 			}
 		}
 	}
