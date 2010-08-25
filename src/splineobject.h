@@ -7,7 +7,7 @@ using namespace std;
 
 class SplineObject {
 public:
-	SplineObject() { iter = splines.end(); }
+	SplineObject();
 	~SplineObject() { }
 
 	void draw();

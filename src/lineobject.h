@@ -7,13 +7,15 @@ using namespace std;
 
 class LineObject {
 public:
-	LineObject() { iter = lines.end(); }
+	LineObject();
 	~LineObject() {  }
 
 	void draw();
 
 	void addLine(float *a, float *b);
 	void deleteLine();
+
+	void addPoint(float x, float y, float z);
 
 	void nextLine();
 	void prevLine();
@@ -23,6 +25,8 @@ public:
 	list<Line> lines;
 
 private:
+	float points[2][3];
+	int pCount;
 	list<Line>::iterator iter;
 };
 
