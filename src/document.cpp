@@ -27,9 +27,11 @@ void Document::addSplineObject() {
 }
 
 void Document::deleteSplineObject() {
-	if (so_iter != spline_objects.end())
-		if ((so_iter = spline_objects.erase(so_iter)) == spline_objects.end() && so_iter != spline_objects.begin())
+	if (so_iter != spline_objects.end()) {
+		so_iter = spline_objects.erase(so_iter);
+		if (so_iter == spline_objects.end() && so_iter != spline_objects.begin())
 			so_iter--;
+	}
 }
 
 void Document::addLineObject() {
@@ -41,9 +43,11 @@ void Document::addLineObject() {
 }
 
 void Document::deleteLineObject() {
-	if (l_iter != line_objects.end())
-		if ((l_iter = line_objects.erase(l_iter)) == line_objects.end() && l_iter != line_objects.begin())
+	if (l_iter != line_objects.end()) {
+		l_iter = line_objects.erase(l_iter);
+		if (l_iter == line_objects.end() && l_iter != line_objects.begin())
 			l_iter--;
+	}
 }
 
 void Document::nextSplineObject() {
