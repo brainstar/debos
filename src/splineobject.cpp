@@ -41,13 +41,6 @@ void SplineObject::deleteSpline() {
 			iter->setColor(1.0, 0.0, 1.0);
 		}
 	}
-	if (iter != splines.end()) {
-		if ((iter = splines.erase(iter)) == splines.end())
-			if (iter != splines.begin()) {
-				iter--;
-				iter->setColor(1.0, 0.0, 1.0);
-			}
-	}
 }
 
 void SplineObject::addPoint(float x, float y, float z) {
