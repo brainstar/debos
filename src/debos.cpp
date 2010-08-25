@@ -64,6 +64,8 @@ Debos::Debos() {
 		newFile();
 	}
 
+	connect( gl, SIGNAL(mouseClicked(float, float)), this, SLOT(mouseClick(float, float)) );
+
 	gl->show();	
 }
 
@@ -250,6 +252,7 @@ void Debos::activateLineMode() {
 }
 
 void Debos::mouseClickView(float x, float y) {
+	qDebug("clicked view at %f, %f", x, y);
 }
 
 void Debos::mouseClickSpline(float x, float y) {
