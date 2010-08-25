@@ -1,0 +1,3 @@
+glob:*.o
+glob:Makefile
+glob:moc_*
