@@ -147,6 +147,7 @@ void Debos::draw() {
 }
 
 void Debos::mouseClick(float x, float y) {
+	qDebug("clicked view at %f, %f", x, y);
 	if (mode == VIEW)
 		mouseClickView(x, y);
 	else if (mode == SPLINE)
@@ -252,7 +253,6 @@ void Debos::activateLineMode() {
 }
 
 void Debos::mouseClickView(float x, float y) {
-	qDebug("clicked view at %f, %f", x, y);
 }
 
 void Debos::mouseClickSpline(float x, float y) {
