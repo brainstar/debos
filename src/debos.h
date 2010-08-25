@@ -30,7 +30,8 @@ public:
 
 public slots:
 	void newFile();
-	void loadFile();
+	bool loadFile();
+	bool loadFile(QString filename);
 	void saveFile();
 	void exportFile();
 	void closeFile();

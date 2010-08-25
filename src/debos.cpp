@@ -57,51 +57,14 @@ Debos::Debos() {
 
 	this->setWindowTitle("debos");
 
-	gl->data = data = new Document;
+	data = 0;
 
-	data->addSplineObject();
-	{
-		float a[3] = { -4.0, -4.0, 0.0 };
-		float b[3] = { -3.0, 4.0, 0.0 };
-		float c[3] = { 3.0, -4.0, 0.0 };
-		float d[3] = { 4.0, 4.0, 0.0 };
-		data->getSplineObject()->addSpline(a, b, c, d);
-	}
-	{
-		float a[3] = { 4.0, 4.0, 0.0 };
-		float b[3] = { 5.0, 12.0, 0.0 };
-		float c[3] = { -4.0, -4.0, 0.0 };
-		float d[3] = { -4.0, 0.0, 0.0 };
-		data->getSplineObject()->addSpline(a, b, c, d);
-	}
-	{
-		float a[3] = { -4.0, 0.0, 0.0 };
-		float b[3] = { -4.0, 4.0, 0.0 };
-		float c[3] = { 4.0, 4.0, 0.0 };
-		float d[3] = { 0.0, 8.0, 0.0 };
-		data->getSplineObject()->addSpline(a, b, c, d);
-	} 
-	data->addLineObject();
-	{
-		float a[3] = { -6.0, 6.0, 0.0 };
-		float b[3] = { 6.0, -6.0, 0.0 };
-		float c[3] = { -6.0, -6.0, 0.0 };
-		float d[3] = { -6.0, -5.0, 0.0 };
-		data->getLineObject()->addLine(a, b);
-		data->getLineObject()->addLine(b, c);
-		data->getLineObject()->addLine(c, d);
-	}
-	
-	{
-		float bounds[4] = { -10.0, 10.0, -10.0, 10.0 };
-		data->setGrid(bounds);
-		data->setAuthor("brainstar");
-		data->setDescription("test document");
+	if (!loadFile("test.xml")) {
+		qDebug("Going to create a new file");
+		newFile();
 	}
 
-	mode = VIEW;
-
-	gl->show();
+	gl->show();	
 }
 
 Debos::~Debos() {
@@ -109,40 +72,67 @@ Debos::~Debos() {
 
 void Debos::newFile() {
 	gl->hide();
-	delete data;
+	qDebug("Widget hidden");
+	if (data) delete data;
+	qDebug("Data deletet");
 	gl->data = data = new Document;
+	qDebug("Data pointer set");
 	gl->show();
+	qDebug("Widget not hidden");
+	mode = VIEW;
+	qDebug("Creating new file");
 }
 
-void Debos::loadFile() {
+bool Debos::loadFile() {
 	QString filename = QFileDialog::getOpenFileName(this, "Open File", "test.xml", "XML Files (*.xml)");
+	qDebug("Filename traced");
+	return loadFile(filename);
+}
+
+bool Debos::loadFile(QString filename) {
 	Document *doc = new Document;
 	if (!filename.isEmpty()) {
+		qDebug("Filename not empty");
 		if (doc->load(filename.toStdString())) {
-			delete data;
+			qDebug("Loading successful");
+			if (data) delete data;
+			qDebug("Data deletet");
 			gl->data = data = doc;
+			qDebug("Data pointer set");
 			gl->show();
+			qDebug("gl->show();");
+			mode = VIEW;
+			qDebug("Mode set");
+			return true;
 		}
-		else
+		else {
 			delete doc;
+			qDebug("Loading not successful");
+		}
 	}
+	return false;
 }
 
 void Debos::exportFile() {
 	QString filename = QFileDialog::getSaveFileName(this, "Export File", "~", "png (*.png)");
-	if (!filename.isEmpty())
+	if (!filename.isEmpty()) {
 		gl->getScreen().save( filename, "png" );
+		qDebug("Exporting file to %s", filename.toStdString().c_str());
+	}
 }
 
 void Debos::saveFile() {
 	QString filename = QFileDialog::getSaveFileName(this, "Save File", "test.xml", "XML Files (*.xml)");
-	if (!filename.isEmpty()) 
+	if (!filename.isEmpty())
 		data->save(filename.toStdString());
 }
 
 void Debos::closeFile() {
 	gl->hide();
-	delete data;
+	if (data) {
+		delete data;
+		qDebug("Closing file");
+	}
 	gl->data = data = 0;
 }
 
@@ -164,26 +154,41 @@ void Debos::mouseClick(float x, float y) {
 }
 
 void Debos::keyPressEvent(QKeyEvent *event) {
-	if( event->key() == Qt::Key_V )
-		activateViewMode();
-	else if( event->key() == Qt::Key_S )
-		activateSplineMode();
-	else if( event->key() == Qt::Key_L )
-		activateLineMode();
+	if (!data) {
+		if (event->key() == Qt::Key_N)
+			newFile();
+	}
+	else {
+		if( event->key() == Qt::Key_V )
+			activateViewMode();
+		else if( event->key() == Qt::Key_S )
+			activateSplineMode();
+		else if( event->key() == Qt::Key_L )
+			activateLineMode();
 
-	else if (event->key() == Qt::Key_N) {
-		if (mode == SPLINE) {
-			data->addSplineObject();
-			qDebug("adding SplineObject");
+		else if (event->key() == Qt::Key_N) {
+			if (mode == SPLINE) {
+				data->addSplineObject();
+				qDebug("adding SplineObject");
+			}
+			else if (mode == LINE) {
+				data->addLineObject();
+				qDebug("adding LineObject");
+			}
 		}
-		else if (mode == LINE) {
-			data->addLineObject();
-			qDebug("adding LineObject");
+		else if (event->key() == Qt::Key_Delete) {
+			if (mode == SPLINE && data->getSplineObject()) {
+					data->getSplineObject()->deleteSpline();
+				qDebug("deleting Spline");
+			}
+			else if (mode == LINE && data->getLineObject()) {
+				data->getLineObject()->deleteLine();
+				qDebug("deleting Line");
+			}
 		}
 	}
 
-	else
-		QWidget::keyPressEvent( event ); // important, default key handling
+	QWidget::keyPressEvent( event ); // important, default key handling
 	
 }
 
