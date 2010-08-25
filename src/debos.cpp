@@ -139,7 +139,7 @@ void Debos::closeFile() {
 }
 
 void Debos::aboutDebos() {
-	QMessageBox::information(this,"debos", "created by Christian Masser\n(c) 2010", "OK");
+	QMessageBox::information(this,"debos", "created by:\nMike Duenbostell,\nChristian Masser\n(c) 2010", "OK");
 }
 
 void Debos::draw() {
