@@ -68,8 +68,8 @@ void SplineObject::addPoint(float x, float y, float z) {
 void SplineObject::nextSpline() {
 	if (iter != splines.end()) {
 		iter->setColor(1.0, 1.0, 1.0);
-		if (++iter == splines.end()) iter--;
-		else qDebug("next Spline");
+		iter++;
+		if (iter == splines.end()) iter--;
 		iter->setColor(1.0, 0.0, 1.0);
 	}
 }
@@ -79,7 +79,6 @@ void SplineObject::prevSpline() {
 		iter->setColor(1.0, 1.0, 1.0);
 		if (iter != splines.begin()) {
 			iter--;
-			qDebug("previous Spline");
 		}
 		iter->setColor(1.0, 0.0, 1.0);
 	}
