@@ -42,10 +42,19 @@ void GLDrawer::resizeGL(int w, int h) {
 		g = data->getGrid();
 	}
 
-	if (w > h)
-		glOrtho(*g * (GLfloat) w / (GLfloat) h, *(g + 1) * (GLfloat) w / (GLfloat) h, *(g + 2), *(g + 3), 1.0, -1.0);
-	else
-		glOrtho(*g, *(g + 1), *(g + 2) * (GLfloat) h / (GLfloat) w, *(g + 3) * (GLfloat) h / (GLfloat) w, 1.0, -1.0);
+	if (w > h) {
+		display[0] = *g * (GLfloat) w / (GLfloat) h;
+		display[1] = *(g+1) * (GLfloat) w / (GLfloat) h;
+		display[2] = *(g+2);
+		display[3] = *(g+3);
+	}
+	else {
+		display[0] = *g;
+		display[1] = *(g+1);
+		display[2] = *(g+2) * (GLfloat) h / (GLfloat) w;
+		display[3] = *(g+3) * (GLfloat) h / (GLfloat) w;
+	}
+	glOrtho(display[0], display[1], display[2], display[3], 1.0, -1.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

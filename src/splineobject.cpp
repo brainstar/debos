@@ -16,6 +16,12 @@ void SplineObject::addSpline(float *a, float *k1, float *k2, float *b) {
 	iter = splines.end();
 	iter--;
 	iter->setColor(1.0, 0.0, 1.0);
+
+	for (int i = 0; i < 3; i++) {
+		points[0][i] = *(b + i);
+		points[1][i] = *(b + i)*2 - *(k2 + i);
+	}
+	pCount = 2;
 }
 
 void SplineObject::deleteSpline() {
@@ -25,6 +31,21 @@ void SplineObject::deleteSpline() {
 				iter--;
 				iter->setColor(1.0, 0.0, 1.0);
 			}
+	}
+}
+
+void SplineObject::addPoint(float x, float y, float z) {
+	if (pCount > 3) {
+		addSpline(&points[0][0], &points[1][0], &points[2][0], &points[3][0]);
+	}
+
+	points[pCount][0] = x;
+	points[pCount][1] = y;
+	points[pCount][2] = z;
+	pCount++;
+
+	if (pCount > 3) {
+		addSpline(&points[0][0], &points[1][0], &points[2][0], &points[3][0]);
 	}
 }
 

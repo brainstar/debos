@@ -1,6 +1,15 @@
 #include "document.h"
 using namespace std;
 
+Document::Document() {
+	so_iter = spline_objects.end();
+	l_iter = line_objects.end();
+	author = "author";
+	description = "description";
+	bounds[0] = bounds[2] = -10.0;
+	bounds[1] = bounds[3] = 10.0;
+}
+
 void Document::draw() {
 	for (list<SplineObject>::iterator it = spline_objects.begin(); it != spline_objects.end(); it++)
 		it->draw();
