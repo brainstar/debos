@@ -1,4 +1,5 @@
 #include "splineobject.h"
+#include "Qt/qwidget.h"
 using namespace std;
 
 SplineObject::SplineObject() {
@@ -19,8 +20,6 @@ void SplineObject::addSpline(float *a, float *k1, float *k2, float *b) {
 	splines.push_back(spline);
 	for (list<Spline>::iterator it = splines.begin(); it != splines.end(); it++)
 		it->setColor(1.0, 1.0, 1.0);
-	if (iter != splines.end())
-		iter->setColor(1.0, 1.0, 1.0);
 	iter = splines.end();
 	iter--;
 	iter->setColor(1.0, 0.0, 1.0);
@@ -70,6 +69,7 @@ void SplineObject::nextSpline() {
 	if (iter != splines.end()) {
 		iter->setColor(1.0, 1.0, 1.0);
 		if (++iter == splines.end()) iter--;
+		else qDebug("next Spline");
 		iter->setColor(1.0, 0.0, 1.0);
 	}
 }
@@ -77,7 +77,10 @@ void SplineObject::nextSpline() {
 void SplineObject::prevSpline() {
 	if (iter != splines.end()) {
 		iter->setColor(1.0, 1.0, 1.0);
-		if (iter != splines.begin()) iter--;
+		if (iter != splines.begin()) {
+			iter--;
+			qDebug("previous Spline");
+		}
 		iter->setColor(1.0, 0.0, 1.0);
 	}
 }

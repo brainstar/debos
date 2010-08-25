@@ -1,4 +1,5 @@
 #include "document.h"
+#include <Qt/qwidget.h>
 using namespace std;
 
 Document::Document() {
@@ -36,7 +37,7 @@ void Document::addLineObject() {
 	line_objects.push_back(lo);
 	l_iter = line_objects.end();
 	l_iter--;
-	so_iter->iterToEnd();
+	l_iter->iterToEnd();
 }
 
 void Document::deleteLineObject() {
@@ -47,14 +48,20 @@ void Document::deleteLineObject() {
 
 void Document::nextSplineObject() {
 	if (++so_iter == spline_objects.end()) so_iter--;
+	else qDebug("next SplineObject");
 }
 
 void Document::prevSplineObject() {
-	if (so_iter != spline_objects.begin()) so_iter--;
+	if (so_iter != spline_objects.begin()) {
+		so_iter--;
+		qDebug("previous SplineObject");
+	}
 }
 
 
 SplineObject* Document::getSplineObject() {
+	if (so_iter == spline_objects.end())
+		return 0;
 	return &(*so_iter);
 }
 
@@ -67,6 +74,8 @@ void Document::prevLineObject() {
 }
 
 LineObject* Document::getLineObject() {
+	if (l_iter == line_objects.end())
+		return 0;
 	return &(*l_iter);
 }
 

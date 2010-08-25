@@ -3,6 +3,7 @@
 
 #include <list>
 #include "spline.h"
+#include <Qt/qwidget.h>
 using namespace std;
 
 class SplineObject {
@@ -20,7 +21,7 @@ public:
 	void nextSpline();
 	void prevSpline();
 
-	void iterToEnd() { iter = splines.end(); }
+	void iterToEnd() { iter = splines.end(); qDebug("SO iterToEnd: %i", &(*iter));}
 
 	list<Spline> splines;
 

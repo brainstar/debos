@@ -72,37 +72,27 @@ Debos::~Debos() {
 
 void Debos::newFile() {
 	gl->hide();
-	qDebug("Widget hidden");
 	if (data) delete data;
-	qDebug("Data deletet");
 	gl->data = data = new Document;
-	qDebug("Data pointer set");
 	gl->show();
-	qDebug("Widget not hidden");
 	mode = VIEW;
 	qDebug("Creating new file");
 }
 
 bool Debos::loadFile() {
 	QString filename = QFileDialog::getOpenFileName(this, "Open File", "test.xml", "XML Files (*.xml)");
-	qDebug("Filename traced");
 	return loadFile(filename);
 }
 
 bool Debos::loadFile(QString filename) {
 	Document *doc = new Document;
 	if (!filename.isEmpty()) {
-		qDebug("Filename not empty");
 		if (doc->load(filename.toStdString())) {
-			qDebug("Loading successful");
 			if (data) delete data;
-			qDebug("Data deletet");
 			gl->data = data = doc;
-			qDebug("Data pointer set");
 			gl->show();
-			qDebug("gl->show();");
 			mode = VIEW;
-			qDebug("Mode set");
+			qDebug("Loading successful");
 			return true;
 		}
 		else {
@@ -190,12 +180,14 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				qDebug("removed SplineObject");
 			}
 			else if (event->key() == Qt::Key_Left) {
-				if (data->getSplineObject())
+				if (data->getSplineObject()) {
 					data->getSplineObject()->prevSpline();
+				}
 			}
 			else if (event->key() == Qt::Key_Right) {
-				if (data->getSplineObject())
+				if (data->getSplineObject()) {
 					data->getSplineObject()->nextSpline();
+				}
 			}
 			else if (event->key() == Qt::Key_Down) {
 				data->prevSplineObject();
@@ -225,7 +217,6 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 	}
 
 	QWidget::keyPressEvent( event ); // important, default key handling
-	
 }
 
 void Debos::activateViewMode() {
