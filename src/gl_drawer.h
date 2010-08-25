@@ -23,6 +23,8 @@ public:
 	QImage getScreen();
 	Document* data;
 
+	void simResize();
+
 signals:
 	void mouseClicked( float x, float y );
 
