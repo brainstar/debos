@@ -161,16 +161,32 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 
 		else if (mode == VIEW) {
 			if (event->key() == Qt::Key_Left) {
-			//TODO: Move visible area to the left
+				float *g = data->getGrid();
+				float w = (*(g+1)) - (*g);
+				*g -= w / 20.0;
+				*(g + 1) -= w / 20.0;
+				gl->simResize();
 			}
 			else if (event->key() == Qt::Key_Right) {
-			//TODO: Move visible area to the right
+				float *g = data->getGrid();
+				float w = (*(g+1)) - (*g);
+				*g += w / 20.0;
+				*(g + 1) += w / 20.0;
+				gl->simResize();
 			}
 			else if (event->key() == Qt::Key_Down) {
-			//TODO: Move visible area downwards
+				float *g = data->getGrid();
+				float h = (*(g+3)) - (*(g+2));
+				*(g + 2) -= h / 20.0;
+				*(g + 3) -= h / 20.0;
+				gl->simResize();
 			}
 			else if (event->key() == Qt::Key_Up) {
-			//TODO: Move visible area upwards
+				float *g = data->getGrid();
+				float h = (*(g+3)) - (*(g+2));
+				*(g + 2) += h / 20.0;
+				*(g + 3) += h / 20.0;
+				gl->simResize();
 			}
 		}
 		else if (mode == SPLINE) {

@@ -68,6 +68,11 @@ void GLDrawer::paintGL() {
 		data->draw();
 }
 
+void GLDrawer::simResize() {
+	makeCurrent();
+	resizeGL(size().width(), size().height());
+}
+
 QImage GLDrawer::getScreen() {
 	return grabFrameBuffer ( false ); // false = no alpha
 }

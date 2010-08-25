@@ -21,7 +21,7 @@ public:
 	void nextSpline();
 	void prevSpline();
 
-	void iterToEnd() { iter = splines.end(); qDebug("SO iterToEnd: %i", &(*iter));}
+	void iterToEnd() { iter = splines.end(); }
 
 	list<Spline> splines;
 
