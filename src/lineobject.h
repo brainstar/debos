@@ -15,7 +15,7 @@ public:
 	void addLine(float *a, float *b);
 	void deleteLine();
 
-	void addPoint(float x, float y, float z);
+	bool addPoint(float x, float y, float z);
 
 	void nextLine();
 	void prevLine();

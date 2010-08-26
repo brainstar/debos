@@ -25,7 +25,7 @@ void LineObject::addLine(float *a, float *b) {
 	iter--;
 
 	for (int i = 0; i < 3; i++) {
-		points[0][i] = points[1][i];
+		points[0][i] = *(b + i);
 	}
 	pCount = 1;
 }
@@ -42,9 +42,12 @@ void LineObject::deleteLine() {
 	}
 }
 
-void LineObject::addPoint(float x, float y, float z) {
+bool LineObject::addPoint(float x, float y, float z) {
+	bool ret = false;
+
 	if(pCount > 1) {
 		addLine(&points[0][0], &points[1][0]);
+		ret = true;
 	}
 
 	points[pCount][0] = x;
@@ -52,9 +55,12 @@ void LineObject::addPoint(float x, float y, float z) {
 	points[pCount][2] = z;
 	pCount++;
 
-	if (pCount > 3) {
+	if (pCount > 1) {
 		addLine(&points[0][0], &points[1][0]);
+		ret = true;
 	} 
+
+	return ret;
 }
 
 void LineObject::nextLine() {

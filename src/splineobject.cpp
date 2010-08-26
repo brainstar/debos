@@ -43,9 +43,12 @@ void SplineObject::deleteSpline() {
 	}
 }
 
-void SplineObject::addPoint(float x, float y, float z) {
+bool SplineObject::addPoint(float x, float y, float z) {
+	bool ret = false;
+
 	if (pCount > 3) {
 		addSpline(&points[0][0], &points[1][0], &points[2][0], &points[3][0]);
+		ret = true;
 	}
 
 	points[pCount][0] = x;
@@ -55,7 +58,10 @@ void SplineObject::addPoint(float x, float y, float z) {
 
 	if (pCount > 3) {
 		addSpline(&points[0][0], &points[1][0], &points[2][0], &points[3][0]);
+		ret = true;
 	}
+
+	return ret;
 }
 
 void SplineObject::nextSpline() {
