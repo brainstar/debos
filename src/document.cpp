@@ -40,6 +40,7 @@ void Document::addLineObject() {
 	l_iter = line_objects.end();
 	l_iter--;
 	l_iter->iterToEnd();
+	qDebug("%i", &(*l_iter));
 }
 
 void Document::deleteLineObject() {
@@ -71,10 +72,12 @@ SplineObject* Document::getSplineObject() {
 
 void Document::nextLineObject() {
 	if(++l_iter == line_objects.end()) l_iter--;
+	else qDebug("next LineObject");
 }
 
 void Document::prevLineObject() {
 	if(l_iter != line_objects.begin()) l_iter--;
+	else qDebug("previous LineObject");
 }
 
 LineObject* Document::getLineObject() {

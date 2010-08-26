@@ -137,7 +137,6 @@ void Debos::draw() {
 }
 
 void Debos::mouseClick(float x, float y) {
-	qDebug("clicked view at %f, %f", x, y);
 	if (mode == VIEW)
 		mouseClickView(x, y);
 	else if (mode == SPLINE)
@@ -221,7 +220,7 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 		}
 		else if (mode == LINE) {
 			if (event->key() == Qt::Key_N) {
-				data->addSplineObject();
+				data->addLineObject();
 				qDebug("adding LineObject");
 			}
 			else if (event->key() == Qt::Key_X) {
@@ -266,9 +265,16 @@ void Debos::mouseClickView(float x, float y) {
 void Debos::mouseClickSpline(float x, float y) {
 	SplineObject *so;
 	if (so = data->getSplineObject()) {
-		so->addPoint(x, y, 0.0);	
+		if (so->addPoint(x, y, 0.0))
+			gl->updateGL();
 	}
 }
 
 void Debos::mouseClickLine(float x, float y) {
+	LineObject *lo;
+	if (lo = data->getLineObject()) {
+		qDebug("lo: %i", lo);
+		if (lo->addPoint(x, y, 0.0))
+			gl->updateGL();
+	}
 }

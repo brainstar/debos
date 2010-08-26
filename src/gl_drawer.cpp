@@ -77,7 +77,11 @@ QImage GLDrawer::getScreen() {
 	return grabFrameBuffer ( false ); // false = no alpha
 }
 
-void GLDrawer::mousePressEvent ( QMouseEvent * event ) {
-	emit mouseClicked( event->x(), event->y() );
-	QGLWidget::mousePressEvent( event );
+void GLDrawer::mousePressEvent(QMouseEvent * event) {
+	float x, y;
+	x = (float)event->x() / size().width()  *  (display[1] - display[0]) + display[0];
+	y = (size().height() - (float) event->y()) / size().height() * (display[3] - display[2]) + display[2];
+	emit mouseClicked(x, y);
+
+	QGLWidget::mousePressEvent(event);
 }
