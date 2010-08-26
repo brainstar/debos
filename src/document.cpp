@@ -40,7 +40,6 @@ void Document::addLineObject() {
 	l_iter = line_objects.end();
 	l_iter--;
 	l_iter->iterToEnd();
-	qDebug("%i", &(*l_iter));
 }
 
 void Document::deleteLineObject() {

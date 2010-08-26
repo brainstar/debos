@@ -215,7 +215,6 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 			}
 			else if (event->key() == Qt::Key_Delete && data->getSplineObject()) {
 				data->getSplineObject()->deleteSpline();
-				qDebug("removed Spline");
 			}
 		}
 		else if (mode == LINE) {
@@ -243,7 +242,6 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 			}
 			else if (event->key() == Qt::Key_Delete && data->getLineObject()) {
 				data->getLineObject()->deleteLine();
-				qDebug("removed Line");
 			}
 		}
 	}
@@ -265,8 +263,8 @@ void Debos::mouseClickView(float x, float y) {
 void Debos::mouseClickSpline(float x, float y) {
 	SplineObject *so;
 	if (so = data->getSplineObject()) {
-		if (so->addPoint(x, y, 0.0))
-			gl->updateGL();
+		so->addPoint(x, y, 0.0);
+		gl->updateGL();
 	}
 }
 
@@ -274,7 +272,7 @@ void Debos::mouseClickLine(float x, float y) {
 	LineObject *lo;
 	if (lo = data->getLineObject()) {
 		qDebug("lo: %i", lo);
-		if (lo->addPoint(x, y, 0.0))
-			gl->updateGL();
+		lo->addPoint(x, y, 0.0);
+		gl->updateGL();
 	}
 }

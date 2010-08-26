@@ -32,6 +32,7 @@ void LineObject::addLine(float *a, float *b) {
 
 void LineObject::deleteLine() {
 	list<Line>::iterator it = lines.end();
+	if (it == lines.begin()) return;
 	it--;
 	if (iter == it || iter == lines.begin()) {
 		iter = lines.erase(iter);
