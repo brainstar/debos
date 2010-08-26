@@ -1,5 +1,6 @@
 #include "splineobject.h"
-#include "Qt/qwidget.h"
+#include "Qt/qwidget.h" 
+#include "QtOpenGL/qgl.h"
 using namespace std;
 
 SplineObject::SplineObject() {
@@ -13,6 +14,13 @@ SplineObject::SplineObject() {
 void SplineObject::draw() {
 	for (list<Spline>::iterator it = splines.begin(); it != splines.end(); it++)
 		it->draw();
+
+/*	glColor3f(0.0f, 1.0f, 1.0f);
+	glPointSize(5.0);
+	glBegin(GL_POINTS);
+		for (int i = 0; i < pCount; i++)
+			glVertex3f(points[i][0], points[i][1], points[i][2]);
+	glEnd(); */
 }
 
 void SplineObject::addSpline(float *a, float *k1, float *k2, float *b) {
@@ -33,6 +41,7 @@ void SplineObject::addSpline(float *a, float *k1, float *k2, float *b) {
 
 void SplineObject::deleteSpline() {
 	list<Spline>::iterator it = splines.end();
+	if (it == splines.begin()) return;
 	it--;
 	if (iter == it || iter == splines.begin()) {
 		iter = splines.erase(iter);
@@ -40,6 +49,7 @@ void SplineObject::deleteSpline() {
 			iter--;
 			iter->setColor(1.0, 0.0, 1.0);
 		}
+		qDebug("removed Spline");
 	}
 }
 
