@@ -64,8 +64,16 @@ void GLDrawer::paintGL() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
-	if (data)
+	if (data) {
+		glColor3f(1.0, 1.0, 0.0);
+		glBegin(GL_LINE);
+			glVertex3f(display[0], 0.0, 0.0);
+			glVertex3f(display[1], 0.0, 0.0);
+			glVertex3f(0.0, display[2], 0.0);
+			glVertex3f(0.0, display[3], 0.0);
+		glEnd();
 		data->draw();
+	}
 }
 
 void GLDrawer::simResize() {

@@ -92,6 +92,7 @@ bool Debos::loadFile(QString filename) {
 		if (doc->load(filename.toStdString())) {
 			if (data) delete data;
 			gl->data = data = doc;
+			gl->simResize();
 			gl->show();
 			mode = VIEW;
 			qDebug("Loading successful");
@@ -159,7 +160,27 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 			activateMode(LINE);
 
 		else if (mode == VIEW) {
-			if (event->key() == Qt::Key_Left) {
+			if (event->key() == Qt::Key_Plus) {
+				float *g = data->getGrid();
+				float w = (*(g+1)) - (*g);
+				float h = (*(g+3)) - (*(g+2));
+				*g += w / 40.0;
+				*(g+1) -= w / 40.0;
+				*(g+2) += h / 40.0;
+				*(g+3) -= h / 40.0;
+				gl->simResize();
+			}
+			if (event->key() == Qt::Key_Minus) {
+				float *g = data->getGrid();
+				float w = (*(g+1)) - (*g);	
+				float h = (*(g+3)) - (*(g+2));
+				*g -= w / 40.0;
+				*(g+1) += w / 40.0;
+				*(g+2) -= h / 40.0;
+				*(g+3) += h / 40.0;
+				gl->simResize();
+			}
+			else if (event->key() == Qt::Key_Left) {
 				float *g = data->getGrid();
 				float w = (*(g+1)) - (*g);
 				*g -= w / 20.0;
