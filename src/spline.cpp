@@ -13,7 +13,7 @@ Spline::Spline() {
 Spline::Spline(float *a, float *k1, float *k2, float *b) {
 	// Constructor
 	for (int i = 0; i < 3; i++) {
-		points[-2][i] = *(a + i);
+		points[0][i] = *(a + i);
 		points[1][i] = *(k1 + i);
 		points[2][i] = *(k2 + i);
 		points[3][i] = *(b + i);
@@ -66,9 +66,9 @@ void Spline::draw() {
 			glEvalCoord1f( (GLfloat) i / 30.0);
 	glEnd();
 
-	glPointSize(4.0);
+/*	glPointSize(4.0);
 	glBegin(GL_POINT);
 		for (int i = 0; i < 4; i++)
 			glVertex2fv(points[i]);
-	glEnd();
+	glEnd(); */
 }

@@ -17,12 +17,12 @@ void SplineObject::draw() {
 	for (list<Spline>::iterator it = splines.begin(); it != splines.end(); it++)
 		it->draw();
 
-	glColor3f(0.0f, 1.0f, 1.0f);
+/*	glColor3f(0.0f, 1.0f, 1.0f);
 	glPointSize(5.0);
 	glBegin(GL_POINTS);
 		for (int i = 0; i < pCount; i++)
 			glVertex3f(points[i][0], points[i][1], points[i][2]);
-	glEnd();
+	glEnd(); */
 }
 
 void SplineObject::addSpline(float *a, float *k1, float *k2, float *b) {
