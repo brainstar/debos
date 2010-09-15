@@ -3,12 +3,14 @@
 using namespace std;
 
 Line::Line() {
+	// Standard constructor
 	a[0] = a[1] = a[2] = 0.0;
 	b[0] = b[1] = b[2] = 0.0;
 	col[0] = col[1] = col[2] = 1.0;
 }
 
 Line::Line(float *x, float *y) {
+	// Constructor
 	a[0] = *x;
 	a[1] = *(x + 1);
 	a[2] = *(x + 2);
@@ -19,20 +21,24 @@ Line::Line(float *x, float *y) {
 }
 
 float* Line::geta() {
+	// Return start point
 	return a;
 }
 
 float* Line::getb() {
+	// Return end point
 	return b;
 }
 
 void Line::setColor(float r, float g, float b) {
+	// Set the color
 	col[0] = r;
 	col[1] = g;
 	col[2] = b;
 }
 
 void Line::draw() {
+	// Draw the line
 	glColor3f(col[0], col[1], col[2]);
 
 	glBegin(GL_LINE);

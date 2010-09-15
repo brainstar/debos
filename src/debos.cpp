@@ -10,6 +10,7 @@
 using namespace std;
 
 Debos::Debos() {
+	// Creating GUI
 	this->resize(500,500);
 
 	QMenuBar* menubar = new QMenuBar();
@@ -57,6 +58,7 @@ Debos::Debos() {
 
 	this->setWindowTitle("debos");
 
+	// Loading default file
 	data = 0;
 
 	if (!loadFile("test.xml")) {
@@ -73,6 +75,7 @@ Debos::~Debos() {
 }
 
 void Debos::newFile() {
+	// Creat empty file
 	gl->hide();
 	if (data) delete data;
 	gl->data = data = new Document;
@@ -82,11 +85,13 @@ void Debos::newFile() {
 }
 
 bool Debos::loadFile() {
+	// Load file with dialog
 	QString filename = QFileDialog::getOpenFileName(this, "Open File", "test.xml", "XML Files (*.xml)");
 	return loadFile(filename);
 }
 
 bool Debos::loadFile(QString filename) {
+	// Load file
 	Document *doc = new Document;
 	if (!filename.isEmpty()) {
 		if (doc->load(filename.toStdString())) {
@@ -107,6 +112,7 @@ bool Debos::loadFile(QString filename) {
 }
 
 void Debos::exportFile() {
+	// Export file to *.png image
 	QString filename = QFileDialog::getSaveFileName(this, "Export File", "~", "png (*.png)");
 	if (!filename.isEmpty()) {
 		gl->getScreen().save( filename, "png" );
@@ -115,12 +121,14 @@ void Debos::exportFile() {
 }
 
 void Debos::saveFile() {
+	// Save file to *.xml file
 	QString filename = QFileDialog::getSaveFileName(this, "Save File", "test.xml", "XML Files (*.xml)");
 	if (!filename.isEmpty())
 		data->save(filename.toStdString());
 }
 
 void Debos::closeFile() {
+	// Close file without saving
 	gl->hide();
 	if (data) {
 		delete data;
@@ -130,14 +138,17 @@ void Debos::closeFile() {
 }
 
 void Debos::aboutDebos() {
+	// Display "About"-window
 	QMessageBox::information(this,"debos", "created by:\nMike Duenbostell,\nChristian Masser\n(c) 2010", "OK");
 }
 
 void Debos::draw() {
+	// Draw all elements of the file
 	if (data) data->draw();
 }
 
 void Debos::mouseClick(float x, float y) {
+	// Event handler for mouse click
 	if (mode == VIEW)
 		mouseClickView(x, y);
 	else if (mode == SPLINE)
@@ -147,11 +158,13 @@ void Debos::mouseClick(float x, float y) {
 }
 
 void Debos::keyPressEvent(QKeyEvent *event) {
+	// Event handler for keyboard stroke
 	if (!data) {
 		if (event->key() == Qt::Key_N)
 			newFile();
 	}
 	else {
+		// Activate modes
 		if(event->key() == Qt::Key_V)
 			activateMode(VIEW);
 		else if(event->key() == Qt::Key_S)
@@ -159,7 +172,9 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 		else if(event->key() == Qt::Key_L)
 			activateMode(LINE);
 
+		// View mode is active
 		else if (mode == VIEW) {
+			// Zoom in
 			if (event->key() == Qt::Key_Plus) {
 				float *g = data->getGrid();
 				float w = (*(g+1)) - (*g);
@@ -170,6 +185,7 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				*(g+3) -= h / 40.0;
 				gl->simResize();
 			}
+			// Zoom out
 			if (event->key() == Qt::Key_Minus) {
 				float *g = data->getGrid();
 				float w = (*(g+1)) - (*g);	
@@ -180,6 +196,7 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				*(g+3) += h / 40.0;
 				gl->simResize();
 			}
+			// Move camera to the left
 			else if (event->key() == Qt::Key_Left) {
 				float *g = data->getGrid();
 				float w = (*(g+1)) - (*g);
@@ -187,6 +204,7 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				*(g + 1) -= w / 20.0;
 				gl->simResize();
 			}
+			// Move camera to the right
 			else if (event->key() == Qt::Key_Right) {
 				float *g = data->getGrid();
 				float w = (*(g+1)) - (*g);
@@ -194,6 +212,7 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				*(g + 1) += w / 20.0;
 				gl->simResize();
 			}
+			// Move camera down
 			else if (event->key() == Qt::Key_Down) {
 				float *g = data->getGrid();
 				float h = (*(g+3)) - (*(g+2));
@@ -201,6 +220,7 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				*(g + 3) -= h / 20.0;
 				gl->simResize();
 			}
+			// Move camera up
 			else if (event->key() == Qt::Key_Up) {
 				float *g = data->getGrid();
 				float h = (*(g+3)) - (*(g+2));
@@ -209,58 +229,74 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				gl->simResize();
 			}
 		}
+		// Spline is active
 		else if (mode == SPLINE) {
+			// Add a SplineObject
 			if (event->key() == Qt::Key_N) {
 				data->addSplineObject();
 				qDebug("adding SplineObject");
 			}
+			// Remove a SplineObject
 			else if (event->key() == Qt::Key_X) {
 				data->deleteSplineObject();
 				qDebug("removed SplineObject");
 			}
+			// Select previous Spline
 			else if (event->key() == Qt::Key_Left) {
 				if (data->getSplineObject()) {
 					data->getSplineObject()->prevSpline();
 				}
 			}
+			// Select next Spline
 			else if (event->key() == Qt::Key_Right) {
 				if (data->getSplineObject()) {
 					data->getSplineObject()->nextSpline();
 				}
 			}
+			// Select previous SplineObject
 			else if (event->key() == Qt::Key_Down) {
 				data->prevSplineObject();
 			}
+			// Select next SplineObject
 			else if (event->key() == Qt::Key_Up) {
 				data->nextSplineObject();
 			}
+			// Delete Spline
 			else if (event->key() == Qt::Key_Delete && data->getSplineObject()) {
 				data->getSplineObject()->deleteSpline();
 			}
 		}
+		// Line mode is active
 		else if (mode == LINE) {
+			// Add a LineObject
 			if (event->key() == Qt::Key_N) {
 				data->addLineObject();
 				qDebug("adding LineObject");
 			}
+			// Delete a LineObject
 			else if (event->key() == Qt::Key_X) {
 				data->deleteLineObject();
 				qDebug("removed LineObject");
 			}
+			// Select previous Line
 			else if (event->key() == Qt::Key_Left) {
 				if (data->getLineObject())
 					data->getLineObject()->prevLine();
 			}
+			// Select next Line
 			else if (event->key() == Qt::Key_Right) {
 				if (data->getLineObject())
 					data->getLineObject()->nextLine();
 			}
+			// Select previous LineObject
 			else if (event->key() == Qt::Key_Down) {
 				data->prevLineObject();
 			}
+			// Select next LineObject
 			else if (event->key() == Qt::Key_Up) {
 				data->nextLineObject();
 			}
+			// Delete Line
 			else if (event->key() == Qt::Key_Delete && data->getLineObject()) {
 				data->getLineObject()->deleteLine();
 			}

@@ -3,6 +3,7 @@
 using namespace std;
 
 LineObject::LineObject() {
+	// Standard constructor
 	for (int i = 0; i < 3; i++) {
 		points[0][i] = points[1][i] = 0.0;
 	}
@@ -11,11 +12,13 @@ LineObject::LineObject() {
 }
 
 void LineObject::draw() {
+	// Draw the LineObject
 	for (list<Line>::iterator it = lines.begin(); it != lines.end(); it++)
 		it->draw();
 }
 
 void LineObject::addLine(float *a, float *b) {
+	// Add a Line
 	Line l(a, b);
 	l.setColor(1.0, 0.0, 1.0);
 	for(list<Line>::iterator it = lines.begin(); it != lines.end(); it++)
@@ -31,6 +34,7 @@ void LineObject::addLine(float *a, float *b) {
 }
 
 void LineObject::deleteLine() {
+	// Delete selected Line
 	list<Line>::iterator it = lines.end();
 	if (it == lines.begin()) return;
 	it--;
@@ -44,6 +48,7 @@ void LineObject::deleteLine() {
 }
 
 bool LineObject::addPoint(float x, float y, float z) {
+	// Append point to the LineObject
 	bool ret = false;
 
 	if(pCount > 1) {
@@ -65,6 +70,7 @@ bool LineObject::addPoint(float x, float y, float z) {
 }
 
 void LineObject::nextLine() {
+	// Select next Line
 	if (iter != lines.end()) {
 		iter->setColor(1.0, 1.0, 1.0);
 		iter++;
@@ -74,6 +80,7 @@ void LineObject::nextLine() {
 }
 
 void LineObject::prevLine() {
+	// Select previous Line
 	if (iter != lines.end()) {
 		iter->setColor(1.0, 1.0, 1.0);
 		if (iter != lines.begin()) iter--;
