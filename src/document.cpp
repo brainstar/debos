@@ -3,6 +3,7 @@
 using namespace std;
 
 Document::Document() {
+	// Standard constructor to fill the file with some default data
 	so_iter = spline_objects.end();
 	l_iter = line_objects.end();
 	author = "author";
@@ -12,6 +13,7 @@ Document::Document() {
 }
 
 void Document::draw() {
+	// Draw everything
 	for (list<SplineObject>::iterator it = spline_objects.begin(); it != spline_objects.end(); it++)
 		it->draw();
 	for(list<LineObject>::iterator it = line_objects.begin(); it != line_objects.end(); it++)
@@ -19,6 +21,7 @@ void Document::draw() {
 }
 
 void Document::addSplineObject() {
+	// Add a new SplineObject and select it
 	SplineObject so;
 	spline_objects.push_back(so);
 	so_iter = spline_objects.end();
@@ -27,6 +30,7 @@ void Document::addSplineObject() {
 }
 
 void Document::deleteSplineObject() {
+	// Delete selected SplineObject
 	if (so_iter != spline_objects.end()) {
 		so_iter = spline_objects.erase(so_iter);
 		if (so_iter == spline_objects.end() && so_iter != spline_objects.begin())
@@ -35,6 +39,7 @@ void Document::deleteSplineObject() {
 }
 
 void Document::addLineObject() {
+	// Add a new LineObject and select it
 	LineObject lo;
 	line_objects.push_back(lo);
 	l_iter = line_objects.end();
@@ -43,6 +48,7 @@ void Document::addLineObject() {
 }
 
 void Document::deleteLineObject() {
+	// Delete selected LineObject
 	if (l_iter != line_objects.end()) {
 		l_iter = line_objects.erase(l_iter);
 		if (l_iter == line_objects.end() && l_iter != line_objects.begin())
@@ -51,11 +57,13 @@ void Document::deleteLineObject() {
 }
 
 void Document::nextSplineObject() {
+	// Select next SplineObject
 	if (++so_iter == spline_objects.end()) so_iter--;
 	else qDebug("next SplineObject");
 }
 
 void Document::prevSplineObject() {
+	// Select previous SplineObject
 	if (so_iter != spline_objects.begin()) {
 		so_iter--;
 		qDebug("previous SplineObject");
@@ -64,22 +72,26 @@ void Document::prevSplineObject() {
 
 
 SplineObject* Document::getSplineObject() {
+	// Return pointer to the selected SplineObject
 	if (so_iter == spline_objects.end())
 		return 0;
 	return &(*so_iter);
 }
 
 void Document::nextLineObject() {
+	// Select next LineObject
 	if(++l_iter == line_objects.end()) l_iter--;
 	else qDebug("next LineObject");
 }
 
 void Document::prevLineObject() {
+	// Select previous LineObject
 	if(l_iter != line_objects.begin()) l_iter--;
 	else qDebug("previous LineObject");
 }
 
 LineObject* Document::getLineObject() {
+	// Return pointer to the selected LineObject
 	if (l_iter == line_objects.end())
 		return 0;
 	return &(*l_iter);
@@ -87,6 +99,7 @@ LineObject* Document::getLineObject() {
 
 
 bool Document::save(string filename) {
+	// Create XML tree and save the file
 	TiXmlDocument doc;
 	{
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
@@ -215,11 +228,12 @@ bool Document::save(string filename) {
 		root->LinkEndChild(object);
 	}
 
-	// Now write the whole thing to disk.
+	// Write the whole thing to disk
 	return doc.SaveFile(filename.c_str());
 }
 
 bool Document::load(string filename) {
+	// Load XML-File and save it into a Document instance
 	TiXmlDocument doc(filename.c_str());
 	if (!doc.LoadFile())
 		return false;
@@ -370,6 +384,7 @@ bool Document::load(string filename) {
 
 
 void Document::setGrid(float* bound) {
+	// Set the grid
 	bounds[0] = *bound;
 	bounds[1] = *(bound + 1);
 	bounds[2] = *(bound + 2);
@@ -377,9 +392,11 @@ void Document::setGrid(float* bound) {
 }
 
 void Document::setAuthor(string aut) {
+	// Set the author
 	author = aut;
 }
 
 void Document::setDescription(string des) {
+	// Set the description
 	description = des;
 }

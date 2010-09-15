@@ -15,6 +15,7 @@ GLDrawer::~GLDrawer() {
 }
 
 void GLDrawer::initializeGL() {
+	// Initializing OpenGL
 	glShadeModel(GL_SMOOTH);
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -28,6 +29,7 @@ void GLDrawer::initializeGL() {
 }
 
 void GLDrawer::resizeGL(int w, int h) {
+	// Resize the Window to display at least what is determined by the grid
 	h = h ? h : 1;
 	w = w ? w : 1;
 
@@ -61,10 +63,12 @@ void GLDrawer::resizeGL(int w, int h) {
 }
 
 void GLDrawer::paintGL() {
+	// Draw everything
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
 	if (data) {
+		// Draw the grid
 		glColor3f(1.0, 1.0, 0.0);
 		glBegin(GL_LINE);
 			glVertex3f(display[0], 0.0, 0.0);
@@ -72,20 +76,24 @@ void GLDrawer::paintGL() {
 			glVertex3f(0.0, display[2], 0.0);
 			glVertex3f(0.0, display[3], 0.0);
 		glEnd();
+		// Draw the rest
 		data->draw();
 	}
 }
 
 void GLDrawer::simResize() {
+	// Simulate a resize
 	makeCurrent();
 	resizeGL(size().width(), size().height());
 }
 
 QImage GLDrawer::getScreen() {
+	// Return a screenshot
 	return grabFrameBuffer ( false ); // false = no alpha
 }
 
 void GLDrawer::mousePressEvent(QMouseEvent * event) {
+	// Event processing of a mouse click
 	float x, y;
 	x = (float)event->x() / size().width()  *  (display[1] - display[0]) + display[0];
 	y = (size().height() - (float) event->y()) / size().height() * (display[3] - display[2]) + display[2];
