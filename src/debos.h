@@ -18,12 +18,12 @@ using namespace std;
 
 enum Mode {
 	VIEW,
-	SPLINE,
-	LINE
+	EDIT
 };
 
 class Debos : public QWidget {
 Q_OBJECT;
+
 public:
 	Debos();
 	~Debos();
@@ -49,8 +49,7 @@ signals:
 
 private:
 	void mouseClickView(float x, float y);
-	void mouseClickSpline(float x, float y);
-	void mouseClickLine(float x, float y);
+	void mouseClickEdit(float x, float y);
 
 	Document* data;
 	GLDrawer* gl;

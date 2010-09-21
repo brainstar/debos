@@ -3,32 +3,29 @@
 
 #include <list>
 #include "spline.h"
+#include "object.h"
 #include <Qt/qwidget.h>
 using namespace std;
 
-class SplineObject {
+class SplineObject : public Object {
 public:
 	SplineObject();
 	~SplineObject() { }
 
 	void draw();
 
-	void addSpline(float *a, float *k1, float *k2, float *b);
-	void deleteSpline();
-
 	bool addPoint(float x, float y, float z);
+	void nextInstance();
+	void prevInstance();
+	void addInstance(float *a, float *k1, float *k2, float *b);
+	void addInstance(float *a, float *b);
+	void deleteInstance();
 
-	void nextSpline();
-	void prevSpline();
-
-	void iterToEnd() { iter = splines.end(); }
+	void iterToEnd();
 
 	list<Spline> splines;
-
 private:
-	float points[4][3];
-	int pCount;
-	list<Spline>::iterator iter;
+	list<Spline>::iterator activeSpline;
 };
 
 #endif
