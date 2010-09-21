@@ -37,7 +37,7 @@ void Line::setColor(float r, float g, float b) {
 	col[2] = b;
 }
 
-void Line::draw() {
+void Line::draw(bool edit) {
 	// Draw the line
 	glColor3f(col[0], col[1], col[2]);
 

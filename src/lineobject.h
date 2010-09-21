@@ -11,7 +11,7 @@ public:
 	LineObject();
 	~LineObject() {  }
 
-	void draw();
+	void draw(bool edit);
 	
 	bool addPoint(float x, float y, float z);
 	void nextInstance();

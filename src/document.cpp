@@ -12,10 +12,10 @@ Document::Document() {
 	bounds[1] = bounds[3] = 10.0;
 }
 
-void Document::draw() {
+void Document::draw(bool edit) {
 	// Draw everything
 	for (list<Object*>::iterator it = objects.begin(); it != objects.end(); it++)
-		(*it)->draw();
+		(*it)->draw(edit);
 }
 
 void Document::addSplineObject() {
@@ -32,6 +32,7 @@ void Document::deleteObject() {
 		activeObject = objects.erase(activeObject);
 		if (activeObject == objects.end())
 			activeObject--;
+		qDebug("removed Object");
 	}
 }
 

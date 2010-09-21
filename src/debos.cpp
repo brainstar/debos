@@ -67,6 +67,7 @@ Debos::Debos() {
 	}
 
 	connect( gl, SIGNAL(mouseClicked(float, float)), this, SLOT(mouseClick(float, float)) );
+	connect(gl, SIGNAL(draw()), this, SLOT(draw()));
 
 	gl->show();	
 }
@@ -80,6 +81,7 @@ void Debos::newFile() {
 	if (data) delete data;
 	gl->data = data = new Document;
 	gl->show();
+	gl->simResize();
 	mode = VIEW;
 	qDebug("Creating new file");
 }
@@ -144,7 +146,11 @@ void Debos::aboutDebos() {
 
 void Debos::draw() {
 	// Draw all elements of the file
-	if (data) data->draw();
+	if (!data) return;
+	if (mode == VIEW)
+		data->draw(false);
+	else if (mode == EDIT)
+		data->draw(true);
 }
 
 void Debos::mouseClick(float x, float y) {
@@ -161,7 +167,7 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 		if (event->key() == Qt::Key_N)
 			newFile();
 	}
-	else {
+	else {	
 		// Activate modes
 		if(event->key() == Qt::Key_V)
 			activateMode(VIEW);
@@ -170,6 +176,9 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 
 		// View mode is active
 		else if (mode == VIEW) {
+			if (event->key() == Qt::Key_C) {
+				closeFile();
+			}
 			// Zoom in
 			if (event->key() == Qt::Key_Plus) {
 				float *g = data->getGrid();
@@ -236,7 +245,6 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 			}
 			else if (event->key() == Qt::Key_X) {
 				data->deleteObject();
-				qDebug("removed Object");
 			}
 			else if (event->key() == Qt::Key_Left) {
 				Object *obj = data->getObject();
@@ -260,6 +268,7 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				Object *obj = data->getObject();
 				if (obj) {
 					obj->deleteInstance();
+					gl->updateGL();
 				}
 			}
 		}

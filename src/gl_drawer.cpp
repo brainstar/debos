@@ -77,7 +77,7 @@ void GLDrawer::paintGL() {
 			glVertex3f(0.0, display[3], 0.0);
 		glEnd();
 		// Draw the rest
-		data->draw();
+		emit draw();
 	}
 }
 
