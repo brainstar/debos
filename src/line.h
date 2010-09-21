@@ -14,7 +14,7 @@ public:
 
 	void setColor(float r, float g, float b);
 
-	void draw();
+	void draw(bool edit);
 
 private:
 	float a[3], b[3];

@@ -12,7 +12,7 @@ public:
 	SplineObject();
 	~SplineObject() { }
 
-	void draw();
+	void draw(bool edit);
 
 	bool addPoint(float x, float y, float z);
 	void nextInstance();

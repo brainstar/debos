@@ -10,7 +10,7 @@ class Document {
 public:
 	Document();
 
-	void draw();
+	void draw(bool edit);
 	
 	void addSplineObject();
 	void addLineObject();

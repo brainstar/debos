@@ -13,17 +13,21 @@ SplineObject::SplineObject() {
 	type = SPLINE;
 }
 
-void SplineObject::draw() {
+void SplineObject::draw(bool edit) {
 	// Draw the SplineObject
-	for (list<Spline>::iterator it = splines.begin(); it != splines.end(); it++)
-		it->draw();
+	list<Spline>::iterator it;
+	for (it = splines.begin(); it != splines.end(); it++)
+		it->draw(edit);
+	it--;
 
-	glColor3f(0.0f, 1.0f, 1.0f);
-	glPointSize(5.0);
-	glBegin(GL_POINTS);
-		for (int i = 0; i < pCount; i++)
-			glVertex3f(points[i][0], points[i][1], points[i][2]);
-	glEnd();
+	if (activeSpline == it && edit) {
+		glColor3f(0.0f, 1.0f, 1.0f);
+		glPointSize(5.0);
+		glBegin(GL_POINTS);
+			for (int i = 0; i < pCount; i++)
+				glVertex3f(points[i][0], points[i][1], points[i][2]);
+		glEnd();
+	}
 }
 
 void SplineObject::addInstance(float *a, float *k1, float *k2, float *b) {
@@ -31,10 +35,10 @@ void SplineObject::addInstance(float *a, float *k1, float *k2, float *b) {
 	Spline spline(a, k1, k2, b);
 	splines.push_back(spline);
 	for (list<Spline>::iterator it = splines.begin(); it != splines.end(); it++)
-		it->setColor(1.0, 1.0, 1.0);
+		it->setActive(false);
 	activeSpline = splines.end();
 	activeSpline--;
-	activeSpline->setColor(1.0, 0.0, 1.0);
+	activeSpline->setActive(true);
 
 	for (int i = 0; i < 3; i++) {
 		points[0][i] = *(b + i);
@@ -50,14 +54,17 @@ void SplineObject::deleteInstance() {
 	list<Spline>::iterator it = splines.end();
 	if (it == splines.begin()) return;
 	it--;
-	if (activeSpline == it || activeSpline == splines.begin()) {
+	if (activeSpline == splines.begin()) {
 		activeSpline = splines.erase(activeSpline);
-		if (activeSpline == splines.end() && activeSpline != splines.begin()) {
-			activeSpline--;
-			activeSpline->setColor(1.0, 0.0, 1.0);
-		}
-		qDebug("removed Spline");
 	}
+	else if (activeSpline == it) {
+		activeSpline == splines.erase(activeSpline);
+		activeSpline--;
+	}
+	if (activeSpline != splines.end()) {
+		activeSpline->setActive(true);
+	}
+	qDebug("removed Spline");
 }
 
 bool SplineObject::addPoint(float x, float y, float z) {
@@ -85,21 +92,21 @@ bool SplineObject::addPoint(float x, float y, float z) {
 void SplineObject::nextInstance() {
 	// Select next Spline
 	if (activeSpline != splines.end()) {
-		activeSpline->setColor(1.0, 1.0, 1.0);
+		activeSpline->setActive(false);
 		activeSpline++;
 		if (activeSpline == splines.end()) activeSpline--;
-		activeSpline->setColor(1.0, 0.0, 1.0);
+		activeSpline->setActive(true);
 	}
 }
 
 void SplineObject::prevInstance() {
 	// Select previous Spline
 	if (activeSpline != splines.end()) {
-		activeSpline->setColor(1.0, 1.0, 1.0);
+		activeSpline->setActive(false);
 		if (activeSpline != splines.begin()) {
 			activeSpline--;
 		}
-		activeSpline->setColor(1.0, 0.0, 1.0);
+		activeSpline->setActive(true);
 	}
 }
 

@@ -18,11 +18,14 @@ public:
 	void setb(float *p);
 	void setColor(float r, float g, float b);
 
-	void draw();
+	void draw(bool edit);
+	
+	void setActive(bool active);
 
 private:
 	float points[4][3];
 	float col[3];
+	bool active;
 };
 
 #endif

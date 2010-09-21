@@ -12,10 +12,10 @@ LineObject::LineObject() {
 	type = LINE;
 }
 
-void LineObject::draw() {
+void LineObject::draw(bool edit) {
 	// Draw the LineObject
 	for (list<Line>::iterator it = lines.begin(); it != lines.end(); it++)
-		it->draw();
+		it->draw(edit);
 }
 
 void LineObject::addInstance(float *a, float *k1, float *k2, float *b) { }

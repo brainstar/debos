@@ -27,6 +27,7 @@ public:
 
 signals:
 	void mouseClicked( float x, float y );
+	void draw();
 
 protected:
 	void initializeGL();
