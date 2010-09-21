@@ -3,31 +3,28 @@
 
 #include <list>
 #include "line.h"
+#include "object.h"
 using namespace std;
 
-class LineObject {
+class LineObject : public Object {
 public:
 	LineObject();
 	~LineObject() {  }
 
 	void draw();
-
-	void addLine(float *a, float *b);
-	void deleteLine();
-
+	
 	bool addPoint(float x, float y, float z);
+	void nextInstance();
+	void prevInstance();
+	void addInstance(float *a, float *k1, float *k2, float *b);
+	void addInstance(float *a, float *b);
+	void deleteInstance();
 
-	void nextLine();
-	void prevLine();
-
-	void iterToEnd() { iter = lines.end(); }
-
+	void iterToEnd();
+	
 	list<Line> lines;
-
 private:
-	float points[2][3];
-	int pCount;
-	list<Line>::iterator iter;
+	list<Line>::iterator activeLine;
 };
 
 #endif

@@ -151,10 +151,8 @@ void Debos::mouseClick(float x, float y) {
 	// Event handler for mouse click
 	if (mode == VIEW)
 		mouseClickView(x, y);
-	else if (mode == SPLINE)
-		mouseClickSpline(x, y);
-	else if (mode == LINE)
-		mouseClickLine(x, y);
+	else if (mode == EDIT)
+		mouseClickEdit(x, y);
 }
 
 void Debos::keyPressEvent(QKeyEvent *event) {
@@ -167,10 +165,8 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 		// Activate modes
 		if(event->key() == Qt::Key_V)
 			activateMode(VIEW);
-		else if(event->key() == Qt::Key_S)
-			activateMode(SPLINE);
-		else if(event->key() == Qt::Key_L)
-			activateMode(LINE);
+		else if(event->key() == Qt::Key_E)
+			activateMode(EDIT);
 
 		// View mode is active
 		else if (mode == VIEW) {
@@ -229,76 +225,42 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				gl->simResize();
 			}
 		}
-		// Spline is active
-		else if (mode == SPLINE) {
-			// Add a SplineObject
-			if (event->key() == Qt::Key_N) {
+		else if (mode == EDIT) {
+			if (event->key() == Qt::Key_S) {
 				data->addSplineObject();
-				qDebug("adding SplineObject");
+				qDebug("added SplineObject");
 			}
-			// Remove a SplineObject
-			else if (event->key() == Qt::Key_X) {
-				data->deleteSplineObject();
-				qDebug("removed SplineObject");
-			}
-			// Select previous Spline
-			else if (event->key() == Qt::Key_Left) {
-				if (data->getSplineObject()) {
-					data->getSplineObject()->prevSpline();
-				}
-			}
-			// Select next Spline
-			else if (event->key() == Qt::Key_Right) {
-				if (data->getSplineObject()) {
-					data->getSplineObject()->nextSpline();
-				}
-			}
-			// Select previous SplineObject
-			else if (event->key() == Qt::Key_Down) {
-				data->prevSplineObject();
-			}
-			// Select next SplineObject
-			else if (event->key() == Qt::Key_Up) {
-				data->nextSplineObject();
-			}
-			// Delete Spline
-			else if (event->key() == Qt::Key_Delete && data->getSplineObject()) {
-				data->getSplineObject()->deleteSpline();
-			}
-		}
-		// Line mode is active
-		else if (mode == LINE) {
-			// Add a LineObject
-			if (event->key() == Qt::Key_N) {
+			else if (event->key() == Qt::Key_L) {
 				data->addLineObject();
-				qDebug("adding LineObject");
+				qDebug("added LineObject");
 			}
-			// Delete a LineObject
 			else if (event->key() == Qt::Key_X) {
-				data->deleteLineObject();
-				qDebug("removed LineObject");
+				data->deleteObject();
+				qDebug("removed Object");
 			}
-			// Select previous Line
 			else if (event->key() == Qt::Key_Left) {
-				if (data->getLineObject())
-					data->getLineObject()->prevLine();
+				Object *obj = data->getObject();
+				if (obj) {
+					obj->prevInstance();
+				}
 			}
-			// Select next Line
 			else if (event->key() == Qt::Key_Right) {
-				if (data->getLineObject())
-					data->getLineObject()->nextLine();
+				Object *obj = data->getObject();
+				if (obj) {
+					obj->nextInstance();
+				}
 			}
-			// Select previous LineObject
 			else if (event->key() == Qt::Key_Down) {
-				data->prevLineObject();
+				data->prevObject();
 			}
-			// Select next LineObject
 			else if (event->key() == Qt::Key_Up) {
-				data->nextLineObject();
+				data->nextObject();
 			}
-			// Delete Line
-			else if (event->key() == Qt::Key_Delete && data->getLineObject()) {
-				data->getLineObject()->deleteLine();
+			else if (event->key() == Qt::Key_Delete) {
+				Object *obj = data->getObject();
+				if (obj) {
+					obj->deleteInstance();
+				}
 			}
 		}
 	}
@@ -317,19 +279,10 @@ void Debos::activateMode(Mode pMode) {
 void Debos::mouseClickView(float x, float y) {
 }
 
-void Debos::mouseClickSpline(float x, float y) {
-	SplineObject *so;
-	if (so = data->getSplineObject()) {
-		so->addPoint(x, y, 0.0);
-		gl->updateGL();
-	}
-}
-
-void Debos::mouseClickLine(float x, float y) {
-	LineObject *lo;
-	if (lo = data->getLineObject()) {
-		qDebug("lo: %i", lo);
-		lo->addPoint(x, y, 0.0);
+void Debos::mouseClickEdit(float x, float y) {
+	Object *obj;
+	if (obj = data->getObject()) {
+		obj->addPoint(x, y, 0.0);
 		gl->updateGL();
 	}
 }

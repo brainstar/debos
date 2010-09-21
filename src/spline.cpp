@@ -66,9 +66,9 @@ void Spline::draw() {
 			glEvalCoord1f( (GLfloat) i / 30.0);
 	glEnd();
 
-/*	glPointSize(4.0);
+	glPointSize(4.0);
 	glBegin(GL_POINT);
 		for (int i = 0; i < 4; i++)
 			glVertex2fv(points[i]);
-	glEnd(); */
+	glEnd();
 }

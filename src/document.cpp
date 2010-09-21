@@ -1,11 +1,11 @@
 #include "document.h"
 #include <Qt/qwidget.h>
+#include "tinyxml/tinyxml.h"
 using namespace std;
 
 Document::Document() {
 	// Standard constructor to fill the file with some default data
-	so_iter = spline_objects.end();
-	l_iter = line_objects.end();
+	activeObject = objects.end();
 	author = "author";
 	description = "description";
 	bounds[0] = bounds[2] = -10.0;
@@ -14,89 +14,55 @@ Document::Document() {
 
 void Document::draw() {
 	// Draw everything
-	for (list<SplineObject>::iterator it = spline_objects.begin(); it != spline_objects.end(); it++)
-		it->draw();
-	for(list<LineObject>::iterator it = line_objects.begin(); it != line_objects.end(); it++)
-		it->draw();
+	for (list<Object*>::iterator it = objects.begin(); it != objects.end(); it++)
+		(*it)->draw();
 }
 
 void Document::addSplineObject() {
 	// Add a new SplineObject and select it
-	SplineObject so;
-	spline_objects.push_back(so);
-	so_iter = spline_objects.end();
-	so_iter--;
-	so_iter->iterToEnd();
+	Object *object = new SplineObject();
+	objects.push_back(object);
+	activeObject = objects.end();
+	activeObject--;
 }
 
-void Document::deleteSplineObject() {
-	// Delete selected SplineObject
-	if (so_iter != spline_objects.end()) {
-		so_iter = spline_objects.erase(so_iter);
-		if (so_iter == spline_objects.end() && so_iter != spline_objects.begin())
-			so_iter--;
+void Document::deleteObject() {
+	// Delete selected Object
+	if (activeObject != objects.end()) {
+		activeObject = objects.erase(activeObject);
+		if (activeObject == objects.end())
+			activeObject--;
 	}
 }
 
 void Document::addLineObject() {
 	// Add a new LineObject and select it
-	LineObject lo;
-	line_objects.push_back(lo);
-	l_iter = line_objects.end();
-	l_iter--;
-	l_iter->iterToEnd();
+	Object* object = new LineObject;
+	objects.push_back(object);
+	activeObject = objects.end();
+	activeObject--;
 }
 
-void Document::deleteLineObject() {
-	// Delete selected LineObject
-	if (l_iter != line_objects.end()) {
-		l_iter = line_objects.erase(l_iter);
-		if (l_iter == line_objects.end() && l_iter != line_objects.begin())
-			l_iter--;
+void Document::nextObject() {
+	// Select next Object
+	if (++activeObject == objects.end()) activeObject--;
+	else qDebug("next Object");
+}
+
+void Document::prevObject() {
+	// Select previous Object
+	if (activeObject != objects.begin()) {
+		activeObject--;
+		qDebug("previous Object");
 	}
 }
 
-void Document::nextSplineObject() {
-	// Select next SplineObject
-	if (++so_iter == spline_objects.end()) so_iter--;
-	else qDebug("next SplineObject");
-}
-
-void Document::prevSplineObject() {
-	// Select previous SplineObject
-	if (so_iter != spline_objects.begin()) {
-		so_iter--;
-		qDebug("previous SplineObject");
-	}
-}
-
-
-SplineObject* Document::getSplineObject() {
+Object* Document::getObject() {
 	// Return pointer to the selected SplineObject
-	if (so_iter == spline_objects.end())
+	if (activeObject == objects.end())
 		return 0;
-	return &(*so_iter);
+	return *activeObject;
 }
-
-void Document::nextLineObject() {
-	// Select next LineObject
-	if(++l_iter == line_objects.end()) l_iter--;
-	else qDebug("next LineObject");
-}
-
-void Document::prevLineObject() {
-	// Select previous LineObject
-	if(l_iter != line_objects.begin()) l_iter--;
-	else qDebug("previous LineObject");
-}
-
-LineObject* Document::getLineObject() {
-	// Return pointer to the selected LineObject
-	if (l_iter == line_objects.end())
-		return 0;
-	return &(*l_iter);
-}
-
 
 bool Document::save(string filename) {
 	// Create XML tree and save the file
@@ -123,7 +89,7 @@ bool Document::save(string filename) {
 		object->LinkEndChild(item);
 
 		item = new TiXmlElement("version");
-		item->LinkEndChild(new TiXmlText("0.1pre4"));
+		item->LinkEndChild(new TiXmlText("0.1"));
 		object->LinkEndChild(item);
 
 		root->LinkEndChild(object);
@@ -131,82 +97,76 @@ bool Document::save(string filename) {
 
 	object = new TiXmlElement("objects");
 
-	// Splines
+	// Splines and Lines
 	{
-		TiXmlElement* curve;
+		TiXmlElement* element;
 		int i;
-		for (list<SplineObject>::iterator it = spline_objects.begin(); it != spline_objects.end(); it++) {
-			curve = new TiXmlElement("curve");
+		for (list<Object*>::iterator iter = objects.begin(); iter != objects.end(); iter++) {
 			i = 1;
-			list<Spline>::iterator ite;
-			for (ite = it->splines.begin(); ite != it->splines.end(); ite++) {
-				float *p;
-				item = new TiXmlElement("pointpair");
-				item->SetAttribute("id", i);
+			if ((*iter)->type == SPLINE) {
+				element = new TiXmlElement("curve");
+				SplineObject* so = (SplineObject*) (*iter);
+				list<Spline>::iterator it;
+				for (it = so->splines.begin(); it != so->splines.end(); it++) {
+					float *p;
+					item = new TiXmlElement("pointpair");
+					item->SetAttribute("id", i);
 
-				p = ite->geta();
-				item->SetDoubleAttribute("x1", *p);
-				item->SetDoubleAttribute("y1", *(p + 1));
-				p = ite->getk1();
-				item->SetDoubleAttribute("x2", *p);
-				item->SetDoubleAttribute("y2", *(p + 1));
+					p = it->geta();
+					item->SetDoubleAttribute("x1", *p);
+					item->SetDoubleAttribute("y1", *(p+1));
+					p = it->getk1();
+					item->SetDoubleAttribute("x2", *p);
+					item->SetDoubleAttribute("y2", *(p+1));
 
-				curve->LinkEndChild(item);
-				i++;
+					element->LinkEndChild(item);
+					i++;
+				}
+				if (it != so->splines.begin()) {
+					it--;
+					float *p1;
+					float *p2;
+					item = new TiXmlElement("pointpair");
+					item->SetAttribute("id", i);
+
+					p1 = it->getk2();
+					p2 = it->getb();
+					item->SetDoubleAttribute("x1", *p2);
+					item->SetDoubleAttribute("y1", *(p2 + 1));
+					item->SetDoubleAttribute("x2", *p2 * 2 - *p1);
+					item->SetDoubleAttribute("y2", *(p2 + 1) * 2 - *(p1 + 1));
+				}
 			}
-			if (ite != it->splines.begin()) {
-				ite--;
-				float *p1;
-				float *p2;
-				item = new TiXmlElement("pointpair");
-				item->SetAttribute("id", i);
+			else if ((*iter)->type == LINE) {
+				element = new TiXmlElement("line");
+				LineObject* lo = (LineObject*) (*iter);
+				list<Line>::iterator it;
+				for (it = lo->lines.begin(); it != lo->lines.end(); it++) {
+					float *p;
+					item = new TiXmlElement("point");
+					item->SetAttribute("id", i);
 
-				p1 = ite->getk2();
-				p2 = ite->getb();
-				item->SetDoubleAttribute("x1", *p2);
-				item->SetDoubleAttribute("y1", *(p2 + 1));
-				item->SetDoubleAttribute("x2", *p2 * 2 - *p1);
-				item->SetDoubleAttribute("y2", *(p2 + 1) * 2 - *(p1 + 1));
+					p = it->geta();
+					item->SetDoubleAttribute("x", *p);
+					item->SetDoubleAttribute("y", *(p + 1));
 
-				curve->LinkEndChild(item);
+					element->LinkEndChild(item);
+					i++;
+				}
+				if (it != lo->lines.begin()) {
+					it--;
+					float *p;
+					item = new TiXmlElement("point");
+					item->SetAttribute("id", i);
+
+					p = it->getb();
+					item->SetDoubleAttribute("x", *p);
+					item->SetDoubleAttribute("y", *(p + 1));
+
+					element->LinkEndChild(item);
+				}
 			}
-			object->LinkEndChild(curve);
-		}		
-	}
-
-	// Lines
-	{
-		TiXmlElement *line;
-		int i;
-		for (list<LineObject>::iterator it = line_objects.begin(); it != line_objects.end(); it++) {
-			line = new TiXmlElement("line");
-			i = 1;
-			list<Line>::iterator ite;
-			for (ite = it->lines.begin(); ite != it->lines.end(); ite++) {
-				float *p;
-				item = new TiXmlElement("point");
-				item->SetAttribute("id", i);
-
-				p = ite->geta();
-				item->SetDoubleAttribute("x", *p);
-				item->SetDoubleAttribute("y", *(p + 1));
-
-				line->LinkEndChild(item);
-				i++;
-			}
-			if (ite != it->lines.begin()) {
-				ite--;
-				float *p;
-				item = new TiXmlElement("point");
-				item->SetAttribute("id", i);
-
-				p = ite->getb();
-				item->SetDoubleAttribute("x", *p);
-				item->SetDoubleAttribute("y", *(p + 1));
-
-				line->LinkEndChild(item);
-			}
-			object->LinkEndChild(line);
+			object->LinkEndChild(element);
 		}
 	}
 
@@ -262,74 +222,73 @@ bool Document::load(string filename) {
 	if (!(object = hRoot.FirstChild("objects").ToElement())) return false;
 	hObject = TiXmlHandle(object);
 
-	// Splines
+	// Splines and Lines
 	{
-		for (int i = 0; item = hObject.Child("curve" ,i).ToElement(); i++) {
-			addSplineObject();
-			TiXmlHandle hItem(item);
-			TiXmlElement *spline = hItem.Child("pointpair", 0).ToElement();
-			if (!spline) break;
+		for (int i = 0; item = hObject.Child(i).ToElement(); i++) {
+			if (item->ValueStr() == "curve") {
+				addSplineObject();
+				TiXmlHandle hItem(item);
+				TiXmlElement *spline = hItem.Child("pointpair", 0).ToElement();
+				if (!spline) break;
+				
+				float a[3], b[3], c[3], d[3];
+				for (int n = 0; n < 3; n++)
+					a[n] = b[n] = c[n] = d[n] = 0.0;
 
-			float a[3], b[3], c[3], d[3];
-			for (int n = 0; n < 3; n++)
-				a[n] = b[n] = c[n] = d[n] = 0.0;
+				spline->QueryFloatAttribute("x1", a);
+				spline->QueryFloatAttribute("y1", &a[1]);
+				spline->QueryFloatAttribute("x2", b);
+				spline->QueryFloatAttribute("y2", &b[1]);
 
-			spline->QueryFloatAttribute("x1", a);
-			spline->QueryFloatAttribute("y1", &a[1]);
-			spline->QueryFloatAttribute("x2", b);
-			spline->QueryFloatAttribute("y2", &b[1]);
+				spline = hItem.Child("pointpair", 1).ToElement();
+				if (!spline) break;
 
-			spline = hItem.Child("pointpair", 1).ToElement();
-			if (!spline) break;
+				spline->QueryFloatAttribute("x1", d);
+				spline->QueryFloatAttribute("y1", &d[1]);
+				spline->QueryFloatAttribute("x2", c);
+				spline->QueryFloatAttribute("y2", &c[1]);
+				c[0] = 2*d[0] - c[0];
+				c[1] = 2*d[1] - c[1];
 
-			spline->QueryFloatAttribute("x1", d);
-			spline->QueryFloatAttribute("y1", &d[1]);
-			spline->QueryFloatAttribute("x2", c);
-			spline->QueryFloatAttribute("y2", &c[1]);
-			c[0] = 2*d[0] - c[0];
-			c[1] = 2*d[1] - c[1];
+				getObject()->addInstance(a, b, c, d);
 
-			getSplineObject()->addSpline(a, b, c, d);
+				for (int j = 2; spline = hItem.Child("pointpair", j).ToElement(); j++) {
+					for (int k = 0; k < 3; k++) {
+						a[k] = d[k];
+						b[k] = 2*d[k] - c[k];
+					}
 
-			for (int j = 2; spline = hItem.Child("pointpair", j).ToElement(); j++) {
-				for (int k = 0; k < 3; k++) {
-					a[k] = d[k];
-					b[k] = 2*d[k] - c[k];
+   	                spline->QueryFloatAttribute("x1", d);
+           	        spline->QueryFloatAttribute("y1", &d[1]);
+                   	spline->QueryFloatAttribute("x2", c);
+           	        spline->QueryFloatAttribute("y2", &c[1]);
+
+   	                c[0] = 2*d[0] - c[0];
+                    c[1] = 2*d[1] - c[1];
+
+					getObject()->addInstance(a, b, c, d);
 				}
-
-          	                spline->QueryFloatAttribute("x1", d);
-                	        spline->QueryFloatAttribute("y1", &d[1]);
-                        	spline->QueryFloatAttribute("x2", c);
-                	        spline->QueryFloatAttribute("y2", &c[1]);
-        	                c[0] = 2*d[0] - c[0];
-	                        c[1] = 2*d[1] - c[1];
-
-				getSplineObject()->addSpline(a, b, c, d);
 			}
-		}
-	} 
+			else if (item->ValueStr() == "line") {
+				addLineObject();
+				TiXmlHandle hItem(item);
+				TiXmlElement *line = hItem.Child("point", 0).ToElement();
+				if (!line) break;
 
-	// Lines
-	{
-		for (int i = 0; item = hObject.Child("line", i).ToElement(); i++) {
-			TiXmlHandle hItem(item);
-			addLineObject();
-			TiXmlElement *line = hItem.Child("point", 0).ToElement();
-			if (!line) break;
+				float a[3], b[3];
+				for (int n = 0; n < 3; n++)
+					a[n] = b[n] = 0;
 
-			float a[3], b[3];
-			for (int n = 0; n < 3; n++)
-				a[n] = b[n] = 0;
-
-			line->QueryFloatAttribute("x", b);
-			line->QueryFloatAttribute("y", &b[1]);
-			
-			for (int j = 1; line = hItem.Child("point", j).ToElement(); j++) {
-				for (int k = 0; k < 3; k++)
-					a[k] = b[k];
 				line->QueryFloatAttribute("x", b);
 				line->QueryFloatAttribute("y", &b[1]);
-				getLineObject()->addLine(a, b);
+			
+				for (int j = 1; line = hItem.Child("point", j).ToElement(); j++) {
+					for (int k = 0; k < 3; k++)
+						a[k] = b[k];
+					line->QueryFloatAttribute("x", b);
+					line->QueryFloatAttribute("y", &b[1]);
+					getObject()->addInstance(a, b);
+				}
 			}
 		}
 	}
@@ -361,34 +320,14 @@ bool Document::load(string filename) {
 		}
 	}
 
-	printf("\n%s\n%s\n%s\n", author.c_str(), description.c_str(), filename.c_str());
-	printf("\nGrid:\n%f/%f .. %f %f\n", bounds[0], bounds[1], bounds[2], bounds[3]);
-	printf("\nSplineObjects: \n");
-	for (list<SplineObject>::iterator a = spline_objects.begin(); a != spline_objects.end(); a++) {
-		printf("+ Splines: \n");
-		for (list<Spline>::iterator b = a->splines.begin(); b != a->splines.end(); b++) {
-			printf("  + Spline %f/%f .. %f/%f .. %f/%f .. %f/%f\n", *(b->geta()), *(b->geta()+1), *(b->getk1()), *(b->getk1()+1),
-				*(b->getk2()), *(b->getk2()+1), *(b->getb()), *(b->getb()+1));
-		}
-	}
-	printf("\nLineObjects: \n");
-	for (list<LineObject>::iterator a = line_objects.begin(); a != line_objects.end(); a++) {
-		printf("+ Lines: \n");
-		for (list<Line>::iterator b = a->lines.begin(); b != a->lines.end(); b++) {
-			printf("  + Line %f/%f .. %f/%f\n", *(b->geta()), *(b->geta()+1), *(b->getb()), *(b->getb()+1));
-		}
-	}
-
 	return true;
 }
 
 
 void Document::setGrid(float* bound) {
 	// Set the grid
-	bounds[0] = *bound;
-	bounds[1] = *(bound + 1);
-	bounds[2] = *(bound + 2);
-	bounds[3] = *(bound + 3);
+	for (int i = 0; i < 4; i++)
+		bounds[i] = bound[i];
 }
 
 void Document::setAuthor(string aut) {
