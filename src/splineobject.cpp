@@ -5,12 +5,27 @@ using namespace std;
 
 SplineObject::SplineObject() {
 	// Standard constructor
-	for (int i = 0; i < 3; i++) {
-		points[0][i] = points[1][i] = points[2][i] = points[3][i] = 0.0;
-	}
-	pCount = 0;
-	activeSpline = splines.end();
+	activeBezier = beziers.end();
 	type = SPLINE;
+}
+
+void SplineObject::nextInstance() {
+	if (activeBezier == beziers.end()) return;
+	activeBezier++;
+	if (activeBezier == beziers.end()) activeBezier--;
+}
+
+void SplineObject::prevInstance() {
+	if (activeBezier == beziers.begin()) return;
+	activeBezier--;
+}
+
+void SplineObject::deleteInstance() {
+	if (activeBezier == beziers.end()) return;
+	activeBezier = beziers.erase(activeBezier);
+	if (activeBezier != beziers.begin()) activeBezier--;
+	
+	computeSplines();
 }
 
 void SplineObject::draw(bool edit) {
@@ -20,97 +35,74 @@ void SplineObject::draw(bool edit) {
 		it->draw(edit);
 	it--;
 
-	if (activeSpline == it && edit) {
-		glColor3f(0.0f, 1.0f, 1.0f);
-		glPointSize(5.0);
-		glBegin(GL_POINTS);
-			for (int i = 0; i < pCount; i++)
-				glVertex3f(points[i][0], points[i][1], points[i][2]);
-		glEnd();
+	// Draw the active BezierPoint
+	if (edit) {
+		if (activeBezier != beziers.end()) {
+			float *a[3];
+			a[0] = activeBezier->getpl();
+			a[1] = activeBezier->getp();
+			a[2] = activeBezier->getpr();
+			glColor3f(0.0f, 1.0f, 1.0f);
+			glPointSize(5.0);
+			glBegin(GL_POINTS);
+				for (int i = 0; i < 3; i++)
+					glVertex3f(a[i][0], a[i][1], a[i][2]);
+			glEnd();
+		}
 	}
-}
-
-void SplineObject::addInstance(float *a, float *k1, float *k2, float *b) {
-	// Add Spline to the SplineObject
-	Spline spline(a, k1, k2, b);
-	splines.push_back(spline);
-	for (list<Spline>::iterator it = splines.begin(); it != splines.end(); it++)
-		it->setActive(false);
-	activeSpline = splines.end();
-	activeSpline--;
-	activeSpline->setActive(true);
-
-	for (int i = 0; i < 3; i++) {
-		points[0][i] = *(b + i);
-		points[1][i] = *(b + i)*2 - *(k2 + i);
-	}
-	pCount = 2;
-}
-
-void SplineObject::addInstance(float *a, float *b) { }
-
-void SplineObject::deleteInstance() {
-	// Delete selected Spline
-	list<Spline>::iterator it = splines.end();
-	if (it == splines.begin()) return;
-	it--;
-	if (activeSpline == splines.begin()) {
-		activeSpline = splines.erase(activeSpline);
-	}
-	else if (activeSpline == it) {
-		activeSpline == splines.erase(activeSpline);
-		activeSpline--;
-	}
-	if (activeSpline != splines.end()) {
-		activeSpline->setActive(true);
-	}
-	qDebug("removed Spline");
 }
 
 bool SplineObject::addPoint(float x, float y, float z) {
 	// Add Point
 	bool ret = false;
-
-	if (pCount > 3) {
-		addInstance(&points[0][0], &points[1][0], &points[2][0], &points[3][0]);
-		ret = true;
-	}
-
-	points[pCount][0] = x;
-	points[pCount][1] = y;
-	points[pCount][2] = z;
-	pCount++;
-
-	if (pCount > 3) {
-		addInstance(&points[0][0], &points[1][0], &points[2][0], &points[3][0]);
-		ret = true;
-	}
+	
+	float p[3], a[3], b[3];
+	
+	p[0] = a[0] = b[0] = x;
+	p[1] = a[1] = b[1] = y;
+	p[2] = a[2] = b[2] = z;
+	
+	a[0] -= 1.;
+	b[0] += 1.;
+	
+	addBezierPoint(p, a, b);
 
 	return ret;
 }
 
-void SplineObject::nextInstance() {
-	// Select next Spline
-	if (activeSpline != splines.end()) {
-		activeSpline->setActive(false);
-		activeSpline++;
-		if (activeSpline == splines.end()) activeSpline--;
-		activeSpline->setActive(true);
-	}
+void SplineObject::addBezierPoint(float *a, float *l, float *r) {
+	BezierPoint p(a, l, r);
+	beziers.push_back(p);
+	
+	computeSplines();
 }
 
-void SplineObject::prevInstance() {
-	// Select previous Spline
-	if (activeSpline != splines.end()) {
-		activeSpline->setActive(false);
-		if (activeSpline != splines.begin()) {
-			activeSpline--;
-		}
-		activeSpline->setActive(true);
-	}
+void SplineObject::turnBezierPoint(float x) {
+	if (activeBezier != beziers.end())
+		activeBezier->turn(x);
+	computeSplines();
 }
 
-void SplineObject::iterToEnd() {
-	activeSpline = splines.end();
-	activeSpline--;
+void SplineObject::moveBezierPoint(float x, float y) {
+	if (activeBezier != beziers.end())
+		activeBezier->move(x, y);
+	computeSplines();
+}
+
+void SplineObject::computeSplines() {
+	list<Spline>::iterator it = splines.begin();
+	while (it != splines.end()) it = splines.erase(it);
+	
+	list<BezierPoint>::iterator it1 = beziers.begin(), it2 = beziers.begin();
+	it2++;
+	while (it2 != beziers.end()) {
+		Spline a(it1->getp(), it1->getpr(), it2->getpl(), it2->getp());
+		a.setActive(false);
+		splines.push_back(a);
+		it1++;
+		it2++;
+	}
+	
+	it = splines.end();
+	it--;
 }

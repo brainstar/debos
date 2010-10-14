@@ -2,7 +2,7 @@
  * debos.cpp
  *
  *  Created on: 22.08.2010
- *      Author: brainstar
+ *      Author: Christian M.
  */
 
 #include "debos.h"
@@ -167,18 +167,51 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 		if (event->key() == Qt::Key_N)
 			newFile();
 	}
-	else {	
-		// Activate modes
-		if(event->key() == Qt::Key_V)
-			activateMode(VIEW);
-		else if(event->key() == Qt::Key_E)
-			activateMode(EDIT);
+	else {			
+		// Actions not related to specific modes use the Shift modifier
+		if (event->modifiers() & Qt::ControlModifier) {
+			// Activate modes
+			if(event->key() == Qt::Key_V)
+				activateMode(VIEW);
+			else if(event->key() == Qt::Key_E)
+				activateMode(EDIT);
 
-		// View mode is active
-		else if (mode == VIEW) {
-			if (event->key() == Qt::Key_C) {
-				closeFile();
+			// Move camera to the left
+			else if (event->key() == Qt::Key_Left) {
+				float *g = data->getGrid();
+				float w = (*(g+1)) - (*g);
+				*g -= w / 20.0;
+				*(g + 1) -= w / 20.0;
+				gl->simResize();
 			}
+
+			// Move camera to the right
+			else if (event->key() == Qt::Key_Right) {
+				float *g = data->getGrid();
+				float w = (*(g+1)) - (*g);
+				*g += w / 20.0;
+				*(g + 1) += w / 20.0;
+				gl->simResize();
+			}
+
+			// Move camera down
+			else if (event->key() == Qt::Key_Down) {
+				float *g = data->getGrid();
+				float h = (*(g+3)) - (*(g+2));
+				*(g + 2) -= h / 20.0;
+				*(g + 3) -= h / 20.0;
+				gl->simResize();
+			}
+
+			// Move camera up
+			else if (event->key() == Qt::Key_Up) {
+				float *g = data->getGrid();
+				float h = (*(g+3)) - (*(g+2));
+				*(g + 2) += h / 20.0;
+				*(g + 3) += h / 20.0;
+				gl->simResize();
+			}
+
 			// Zoom in
 			if (event->key() == Qt::Key_Plus) {
 				float *g = data->getGrid();
@@ -190,6 +223,7 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				*(g+3) -= h / 40.0;
 				gl->simResize();
 			}
+			
 			// Zoom out
 			if (event->key() == Qt::Key_Minus) {
 				float *g = data->getGrid();
@@ -201,74 +235,110 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				*(g+3) += h / 40.0;
 				gl->simResize();
 			}
-			// Move camera to the left
-			else if (event->key() == Qt::Key_Left) {
-				float *g = data->getGrid();
-				float w = (*(g+1)) - (*g);
-				*g -= w / 20.0;
-				*(g + 1) -= w / 20.0;
-				gl->simResize();
-			}
-			// Move camera to the right
-			else if (event->key() == Qt::Key_Right) {
-				float *g = data->getGrid();
-				float w = (*(g+1)) - (*g);
-				*g += w / 20.0;
-				*(g + 1) += w / 20.0;
-				gl->simResize();
-			}
-			// Move camera down
-			else if (event->key() == Qt::Key_Down) {
-				float *g = data->getGrid();
-				float h = (*(g+3)) - (*(g+2));
-				*(g + 2) -= h / 20.0;
-				*(g + 3) -= h / 20.0;
-				gl->simResize();
-			}
-			// Move camera up
-			else if (event->key() == Qt::Key_Up) {
-				float *g = data->getGrid();
-				float h = (*(g+3)) - (*(g+2));
-				*(g + 2) += h / 20.0;
-				*(g + 3) += h / 20.0;
-				gl->simResize();
-			}
 		}
-		else if (mode == EDIT) {
-			if (event->key() == Qt::Key_S) {
-				data->addSplineObject();
-				qDebug("added SplineObject");
+
+		// View mode is active
+		else if (mode == VIEW) {
+			if (event->key() == Qt::Key_C) {
+				closeFile();
 			}
-			else if (event->key() == Qt::Key_L) {
-				data->addLineObject();
-				qDebug("added LineObject");
-			}
-			else if (event->key() == Qt::Key_X) {
-				data->deleteObject();
-			}
-			else if (event->key() == Qt::Key_Left) {
-				Object *obj = data->getObject();
-				if (obj) {
-					obj->prevInstance();
-				}
-			}
-			else if (event->key() == Qt::Key_Right) {
-				Object *obj = data->getObject();
-				if (obj) {
-					obj->nextInstance();
-				}
-			}
+			// Select previous Object
 			else if (event->key() == Qt::Key_Down) {
 				data->prevObject();
 			}
+			// Select next Object
 			else if (event->key() == Qt::Key_Up) {
 				data->nextObject();
 			}
-			else if (event->key() == Qt::Key_Delete) {
-				Object *obj = data->getObject();
-				if (obj) {
-					obj->deleteInstance();
-					gl->updateGL();
+			// Add a SplineObject
+			else if (event->key() == Qt::Key_S) {
+				data->addSplineObject();
+				qDebug("added SplineObject");
+			}
+			// Delete an Object
+			else if (event->key() == Qt::Key_X) {
+				data->deleteObject();
+			}
+		}
+		
+		// Edit mode is active
+		else if (mode == EDIT) {
+			// Alt Modifier is used for moving operations
+			if (event->modifiers() & Qt::AltModifier) {
+				// Move BezierPoint
+				if (event->key() == Qt::Key_Down) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE)
+							((SplineObject*)obj)->moveBezierPoint(0., -1.);
+					}
+				}
+				
+				if (event->key() == Qt::Key_Up) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE)
+							((SplineObject*)obj)->moveBezierPoint(0., 1.);
+					}
+				}
+				
+				if (event->key() == Qt::Key_Left) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE)
+							((SplineObject*)obj)->moveBezierPoint(-1., 0.);
+					}
+				}
+				
+				if (event->key() == Qt::Key_Right) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE)
+							((SplineObject*)obj)->moveBezierPoint(1., 0.);
+					}
+				}
+			}
+			
+			else {
+				// Select previous BezierPoint
+				if (event->key() == Qt::Key_Down) {
+					Object *obj = data->getObject();
+					if (obj) {
+						obj->prevInstance();
+					}
+				}
+			
+				// Select next BezierPoint
+				else if (event->key() == Qt::Key_Up) {
+					Object *obj = data->getObject();
+					if (obj) {
+						obj->nextInstance();
+					}
+				}
+			
+				// Turn BezierPoint
+				else if (event->key() == Qt::Key_Left) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE)
+							((SplineObject*)obj)->turnBezierPoint(10.);
+					}
+				}
+				else if (event->key() == Qt::Key_Right) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE)
+							((SplineObject*)obj)->turnBezierPoint(-10.);
+					}
+				}
+			
+				// Delete BezierPoint
+				else if (event->key() == Qt::Key_Delete) {
+					Object *obj = data->getObject();
+					if (obj) {
+						obj->deleteInstance();
+						gl->updateGL();
+					}
 				}
 			}
 		}

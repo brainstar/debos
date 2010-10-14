@@ -8,6 +8,7 @@ Spline::Spline() {
 		for (int j = 0; j < 3; j++)
 			points[i][j] = 0;
 	col[0] = col[1] = col[2] = 1.0f;
+	active = false;
 }
 
 Spline::Spline(float *a, float *k1, float *k2, float *b) {
@@ -59,12 +60,15 @@ void Spline::setColor(float r, float g, float b) {
 
 void Spline::draw(bool edit) {
 	// Draw the Spline
-	if (active && edit)
+	if (active && edit) {
 		glColor3f(1.0, 0.0, 1.0);
-	else if (edit)
-		glColor3f(0.0, 1.0, 1.0);
-	else
+	}
+	else if (edit) {
+		glColor3f(1.0, 1.0, 1.0);
+	}
+	else {
 		glColor3f(col[0], col[1], col[2]);
+	}
 
 	glMap1f(GL_MAP1_VERTEX_3, 0.0, 1.0, 3, 4, &points[0][0]);
 	glBegin(GL_LINE_STRIP);
