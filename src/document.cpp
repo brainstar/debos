@@ -1,6 +1,7 @@
 #include "document.h"
 #include <Qt/qwidget.h>
 #include "tinyxml/tinyxml.h"
+#define VERSION "0.2pre1"
 using namespace std;
 
 Document::Document() {
@@ -36,14 +37,6 @@ void Document::deleteObject() {
 	}
 }
 
-void Document::addLineObject() {
-	// Add a new LineObject and select it
-	Object* object = new LineObject;
-	objects.push_back(object);
-	activeObject = objects.end();
-	activeObject--;
-}
-
 void Document::nextObject() {
 	// Select next Object
 	if (++activeObject == objects.end()) activeObject--;
@@ -66,17 +59,17 @@ Object* Document::getObject() {
 }
 
 bool Document::save(string filename) {
-	// Create XML tree and save the file
+	// Create XML tree and save file
 	TiXmlDocument doc;
 	{
 		TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
 		doc.LinkEndChild(decl);
 	}
-	TiXmlElement* root = new TiXmlElement("debos");
+	TiXmlElement *root = new TiXmlElement("debos");
 	doc.LinkEndChild(root);
-	TiXmlElement* object;
-	TiXmlElement* item;
-
+	TiXmlElement *object;
+	TiXmlElement *item;
+	
 	// Info
 	{
 		object = new TiXmlElement("info");
@@ -90,84 +83,47 @@ bool Document::save(string filename) {
 		object->LinkEndChild(item);
 
 		item = new TiXmlElement("version");
-		item->LinkEndChild(new TiXmlText("0.1"));
+		item->LinkEndChild(new TiXmlText("0.2pre1"));
 		object->LinkEndChild(item);
 
 		root->LinkEndChild(object);
 	}
 
 	object = new TiXmlElement("objects");
-
-	// Splines and Lines
+	
+	// Bezier-Points
 	{
 		TiXmlElement* element;
 		int i;
 		for (list<Object*>::iterator iter = objects.begin(); iter != objects.end(); iter++) {
 			i = 1;
 			if ((*iter)->type == SPLINE) {
-				element = new TiXmlElement("curve");
-				SplineObject* so = (SplineObject*) (*iter);
-				list<Spline>::iterator it;
-				for (it = so->splines.begin(); it != so->splines.end(); it++) {
+				element = new TiXmlElement("spline");
+				SplineObject *so = (SplineObject*) (*iter);
+				list<BezierPoint>::iterator it;
+				for (it = so->beziers.begin(); it != so->beziers.end(); it++) {
 					float *p;
-					item = new TiXmlElement("pointpair");
+					item = new TiXmlElement("BezierPoint");
 					item->SetAttribute("id", i);
-
-					p = it->geta();
-					item->SetDoubleAttribute("x1", *p);
-					item->SetDoubleAttribute("y1", *(p+1));
-					p = it->getk1();
-					item->SetDoubleAttribute("x2", *p);
-					item->SetDoubleAttribute("y2", *(p+1));
-
+					
+					p = it->getpl();
+					item->SetDoubleAttribute("l_x", *p);
+					item->SetDoubleAttribute("l_y", *(p+1));
+					
+					p = it->getp();
+					item->SetDoubleAttribute("p_x", *p);
+					item->SetDoubleAttribute("p_y", *(p+1));
+					
+					p = it->getpr();
+					item->SetDoubleAttribute("r_x", *p);
+					item->SetDoubleAttribute("r_y", *(p+1));
+					
 					element->LinkEndChild(item);
+					
 					i++;
 				}
-				if (it != so->splines.begin()) {
-					it--;
-					float *p1;
-					float *p2;
-					item = new TiXmlElement("pointpair");
-					item->SetAttribute("id", i);
-
-					p1 = it->getk2();
-					p2 = it->getb();
-					item->SetDoubleAttribute("x1", *p2);
-					item->SetDoubleAttribute("y1", *(p2 + 1));
-					item->SetDoubleAttribute("x2", *p2 * 2 - *p1);
-					item->SetDoubleAttribute("y2", *(p2 + 1) * 2 - *(p1 + 1));
-				}
+				object->LinkEndChild(element);
 			}
-			else if ((*iter)->type == LINE) {
-				element = new TiXmlElement("line");
-				LineObject* lo = (LineObject*) (*iter);
-				list<Line>::iterator it;
-				for (it = lo->lines.begin(); it != lo->lines.end(); it++) {
-					float *p;
-					item = new TiXmlElement("point");
-					item->SetAttribute("id", i);
-
-					p = it->geta();
-					item->SetDoubleAttribute("x", *p);
-					item->SetDoubleAttribute("y", *(p + 1));
-
-					element->LinkEndChild(item);
-					i++;
-				}
-				if (it != lo->lines.begin()) {
-					it--;
-					float *p;
-					item = new TiXmlElement("point");
-					item->SetAttribute("id", i);
-
-					p = it->getb();
-					item->SetDoubleAttribute("x", *p);
-					item->SetDoubleAttribute("y", *(p + 1));
-
-					element->LinkEndChild(item);
-				}
-			}
-			object->LinkEndChild(element);
 		}
 	}
 
@@ -191,6 +147,7 @@ bool Document::save(string filename) {
 
 	// Write the whole thing to disk
 	return doc.SaveFile(filename.c_str());
+	return false;
 }
 
 bool Document::load(string filename) {
@@ -214,6 +171,8 @@ bool Document::load(string filename) {
 		object = hRoot.FirstChild("info").ToElement();
 		if (!object) return false;
 
+		if (item = object->FirstChild("version")->ToElement())
+			version = item->GetText();
 		if (item = object->FirstChild("author")->ToElement())
 			author = item->GetText();
 		if (item = object->FirstChild("description")->ToElement())
@@ -222,73 +181,29 @@ bool Document::load(string filename) {
 
 	if (!(object = hRoot.FirstChild("objects").ToElement())) return false;
 	hObject = TiXmlHandle(object);
+	
+	if (version != VERSION)
+		return false;
 
-	// Splines and Lines
+	// Splines
 	{
 		for (int i = 0; item = hObject.Child(i).ToElement(); i++) {
-			if (item->ValueStr() == "curve") {
+			if (item->ValueStr() == "spline") {
 				addSplineObject();
 				TiXmlHandle hItem(item);
-				TiXmlElement *spline = hItem.Child("pointpair", 0).ToElement();
-				if (!spline) break;
-				
-				float a[3], b[3], c[3], d[3];
-				for (int n = 0; n < 3; n++)
-					a[n] = b[n] = c[n] = d[n] = 0.0;
-
-				spline->QueryFloatAttribute("x1", a);
-				spline->QueryFloatAttribute("y1", &a[1]);
-				spline->QueryFloatAttribute("x2", b);
-				spline->QueryFloatAttribute("y2", &b[1]);
-
-				spline = hItem.Child("pointpair", 1).ToElement();
-				if (!spline) break;
-
-				spline->QueryFloatAttribute("x1", d);
-				spline->QueryFloatAttribute("y1", &d[1]);
-				spline->QueryFloatAttribute("x2", c);
-				spline->QueryFloatAttribute("y2", &c[1]);
-				c[0] = 2*d[0] - c[0];
-				c[1] = 2*d[1] - c[1];
-
-				getObject()->addInstance(a, b, c, d);
-
-				for (int j = 2; spline = hItem.Child("pointpair", j).ToElement(); j++) {
-					for (int k = 0; k < 3; k++) {
-						a[k] = d[k];
-						b[k] = 2*d[k] - c[k];
-					}
-
-   	                spline->QueryFloatAttribute("x1", d);
-           	        spline->QueryFloatAttribute("y1", &d[1]);
-                   	spline->QueryFloatAttribute("x2", c);
-           	        spline->QueryFloatAttribute("y2", &c[1]);
-
-   	                c[0] = 2*d[0] - c[0];
-                    c[1] = 2*d[1] - c[1];
-
-					getObject()->addInstance(a, b, c, d);
-				}
-			}
-			else if (item->ValueStr() == "line") {
-				addLineObject();
-				TiXmlHandle hItem(item);
-				TiXmlElement *line = hItem.Child("point", 0).ToElement();
-				if (!line) break;
-
-				float a[3], b[3];
-				for (int n = 0; n < 3; n++)
-					a[n] = b[n] = 0;
-
-				line->QueryFloatAttribute("x", b);
-				line->QueryFloatAttribute("y", &b[1]);
-			
-				for (int j = 1; line = hItem.Child("point", j).ToElement(); j++) {
-					for (int k = 0; k < 3; k++)
-						a[k] = b[k];
-					line->QueryFloatAttribute("x", b);
-					line->QueryFloatAttribute("y", &b[1]);
-					getObject()->addInstance(a, b);
+				TiXmlElement *bezier;
+				for (int j = 0; bezier = hItem.Child("BezierPoint", j).ToElement(); j++) {
+					float p[3], l[3], r[3];
+					p[2] = l[2] = r[2] = 0.;
+					
+					bezier->QueryFloatAttribute("p_x", &p[0]);
+					bezier->QueryFloatAttribute("p_y", &p[1]);
+					bezier->QueryFloatAttribute("l_x", &l[0]);
+					bezier->QueryFloatAttribute("l_y", &l[1]);
+					bezier->QueryFloatAttribute("r_x", &r[0]);
+					bezier->QueryFloatAttribute("r_y", &r[1]);
+					
+					((SplineObject*)getObject())->addBezierPoint(p, l, r);
 				}
 			}
 		}

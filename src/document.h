@@ -2,7 +2,6 @@
 #define DOCUMENT_H
 
 #include "splineobject.h"
-#include "lineobject.h"
 #include <string>
 using namespace std;
 
@@ -13,7 +12,6 @@ public:
 	void draw(bool edit);
 	
 	void addSplineObject();
-	void addLineObject();
 	void deleteObject();
 
 	void nextObject();
@@ -27,12 +25,13 @@ public:
 	float *getGrid() { return bounds; }
 	void setAuthor(string aut);
 	void setDescription(string des);
+	
 private:
 	list<Object*> objects;
 	list<Object*>::iterator activeObject;
 
 	float bounds[4];
-	string author, description;
+	string author, description, version;
 };
 
 #endif

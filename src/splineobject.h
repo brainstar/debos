@@ -4,6 +4,7 @@
 #include <list>
 #include "spline.h"
 #include "object.h"
+#include "bezier.h"
 #include <Qt/qwidget.h>
 using namespace std;
 
@@ -15,17 +16,20 @@ public:
 	void draw(bool edit);
 
 	bool addPoint(float x, float y, float z);
+	
 	void nextInstance();
 	void prevInstance();
-	void addInstance(float *a, float *k1, float *k2, float *b);
-	void addInstance(float *a, float *b);
 	void deleteInstance();
-
-	void iterToEnd();
+	
+	void addBezierPoint(float *a, float *l, float *r);
+	void turnBezierPoint(float x);
+	void moveBezierPoint(float x, float y);
+	void computeSplines();
 
 	list<Spline> splines;
+	list<BezierPoint> beziers;
 private:
-	list<Spline>::iterator activeSpline;
+	list<BezierPoint>::iterator activeBezier;
 };
 
 #endif

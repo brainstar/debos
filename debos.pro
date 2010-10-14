@@ -10,19 +10,18 @@ QT += opengl
 
 # Input
 HEADERS += src/debos.h \
+           src/bezier.h \
+           src/object.h \
            src/document.h \
            src/gl_drawer.h \
-           src/line.h \
-           src/lineobject.h \
            src/spline.h \
            src/splineobject.h \
            src/tinyxml/tinystr.h \
            src/tinyxml/tinyxml.h
 SOURCES += src/debos.cpp \
+           src/bezier.cpp \
            src/document.cpp \
            src/gl_drawer.cpp \
-           src/line.cpp \
-           src/lineobject.cpp \
            src/main.cpp \
            src/spline.cpp \
            src/splineobject.cpp \
