@@ -86,6 +86,7 @@ void SplineObject::turnBezierPoint(float x) {
 void SplineObject::moveBezierPoint(float x, float y) {
 	if (activeBezier != beziers.end())
 		activeBezier->move(x, y);
+	
 	computeSplines();
 }
 

@@ -9,6 +9,7 @@
 using namespace std;
 
 GLDrawer::GLDrawer(QWidget *parent, char *name) : QGLWidget(parent) {
+	setMouseTracking(true);
 }
 
 GLDrawer::~GLDrawer() {
@@ -100,4 +101,8 @@ void GLDrawer::mousePressEvent(QMouseEvent * event) {
 	emit mouseClicked(x, y);
 
 	QGLWidget::mousePressEvent(event);
+}
+
+void GLDrawer::mouseMoveEvent(QMouseEvent *event) {
+	emit mouseMoved(event->globalX(), event->globalY());
 }

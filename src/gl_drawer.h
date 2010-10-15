@@ -27,6 +27,7 @@ public:
 
 signals:
 	void mouseClicked( float x, float y );
+	void mouseMoved(int x, int y);
 	void draw();
 
 protected:
@@ -34,6 +35,8 @@ protected:
 	void resizeGL(int w, int h);
 	void paintGL();
 	void mousePressEvent( QMouseEvent *event );
+	void mouseMoveEvent(QMouseEvent *event);
+	
 private:
 	float display[4]; // current size of the display, bigger than the size defined in data
 };
