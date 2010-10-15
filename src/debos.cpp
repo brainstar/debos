@@ -10,6 +10,11 @@
 using namespace std;
 
 Debos::Debos() {
+	// Initializing interactive variables
+	setMouseTracking(true);
+	grabMouse();
+	bGrab = false;
+
 	// Creating GUI
 	this->resize(500,500);
 
@@ -67,6 +72,7 @@ Debos::Debos() {
 	}
 
 	connect( gl, SIGNAL(mouseClicked(float, float)), this, SLOT(mouseClick(float, float)) );
+	connect(gl, SIGNAL(mouseMoved(int, int)), this, SLOT(mouseMove(int, int)));
 	connect(gl, SIGNAL(draw()), this, SLOT(draw()));
 
 	gl->show();	
@@ -159,6 +165,31 @@ void Debos::mouseClick(float x, float y) {
 		mouseClickView(x, y);
 	else if (mode == EDIT)
 		mouseClickEdit(x, y);
+}
+
+void Debos::mouseMove(int x, int y) {
+	if (data) {
+		if (bGrab) {
+			int diff[2];
+			diff[0] = x - iMouse[0];
+			diff[1] = iMouse[1] - y;
+			Object *obj = data->getObject();
+			if (obj) {
+				if (obj->type == SPLINE) {
+					SplineObject *so = (SplineObject*) obj;
+					so->moveBezierPoint((float) diff[0] / 50., (float) diff[1] / 50.);
+				}
+			}
+		}
+		iMouse[0] = x;
+		iMouse[1] = y;
+		gl->updateGL();
+	}
+}
+
+void Debos::mouseMoveEvent(QMouseEvent *event) {
+	mouseMove(event->globalX(), event->globalY());
+	QWidget::mouseMoveEvent(event);
 }
 
 void Debos::keyPressEvent(QKeyEvent *event) {
@@ -300,8 +331,21 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 			}
 			
 			else {
+				// Move BezierPoint
+				if (event->key() == Qt::Key_G) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE) {
+							SplineObject *so = (SplineObject*) obj;
+							if (so->beziers.begin() != so->beziers.end()) {
+								bGrab = true;
+							}
+						}
+					}
+				}
+				
 				// Select previous BezierPoint
-				if (event->key() == Qt::Key_Down) {
+				else if (event->key() == Qt::Key_Down) {
 					Object *obj = data->getObject();
 					if (obj) {
 						obj->prevInstance();
@@ -359,9 +403,14 @@ void Debos::mouseClickView(float x, float y) {
 }
 
 void Debos::mouseClickEdit(float x, float y) {
-	Object *obj;
-	if (obj = data->getObject()) {
-		obj->addPoint(x, y, 0.0);
-		gl->updateGL();
+	if (bGrab) {
+		bGrab = false;
+	}
+	else {
+		Object *obj;
+		if (obj = data->getObject()) {
+			obj->addPoint(x, y, 0.0);
+			gl->updateGL();
+		}
 	}
 }

@@ -41,8 +41,10 @@ public slots:
 	void draw();
 
 	void mouseClick(float x, float y);
+	void mouseMove(int x, int y);
 
 protected:
+	void mouseMoveEvent(QMouseEvent *event);
 	void keyPressEvent(QKeyEvent *event);
 
 signals:
@@ -54,6 +56,9 @@ private:
 	Document* data;
 	GLDrawer* gl;
 	Mode mode;
+	
+	bool bGrab;
+	int iMouse[2];
 };
 
 #endif /* DEBOS_H_ */
