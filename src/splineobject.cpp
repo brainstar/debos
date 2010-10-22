@@ -7,16 +7,31 @@ SplineObject::SplineObject() {
 	// Standard constructor
 	activeBezier = beziers.end();
 	type = SPLINE;
+	bClosed = false;
 }
 
 void SplineObject::nextInstance() {
 	if (activeBezier == beziers.end()) return;
 	activeBezier++;
-	if (activeBezier == beziers.end()) activeBezier--;
+	if (activeBezier == beziers.end()) {
+		if (bClosed) {
+			activeBezier = beziers.begin();
+		}
+		else {
+			activeBezier--;
+		}
+	}
 }
 
 void SplineObject::prevInstance() {
-	if (activeBezier == beziers.begin()) return;
+	if (activeBezier == beziers.begin()) {
+		if (bClosed) {
+			activeBezier = beziers.end();
+		}
+		else {
+			return;
+		}
+	}
 	activeBezier--;
 }
 
@@ -73,7 +88,10 @@ bool SplineObject::addPoint(float x, float y, float z) {
 void SplineObject::addBezierPoint(float *a, float *l, float *r) {
 	BezierPoint p(a, l, r);
 	beziers.push_back(p);
-	
+
+	activeBezier = beziers.end();
+	activeBezier--;
+
 	computeSplines();
 }
 
@@ -102,6 +120,13 @@ void SplineObject::computeSplines() {
 		splines.push_back(a);
 		it1++;
 		it2++;
+	}
+	
+	if (bClosed && it1 != beziers.end()) {
+		it2 = beziers.begin();
+		Spline a(it1->getp(), it1->getpr(), it2->getpl(), it2->getp());
+		a.setActive(false);
+		splines.push_back(a);
 	}
 	
 	it = splines.end();

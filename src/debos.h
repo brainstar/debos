@@ -58,7 +58,7 @@ private:
 	Mode mode;
 	
 	bool bGrab;
-	int iMouse[2];
+	float iMouse[2], iPos[2];
 };
 
 #endif /* DEBOS_H_ */
