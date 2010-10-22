@@ -101,6 +101,17 @@ void SplineObject::turnBezierPoint(float x) {
 	computeSplines();
 }
 
+void SplineObject::turnBezierPoint(float FromX, float FromY, float ToX, float ToY) {
+	if (activeBezier != beziers.end()) {
+		float a = activeBezier->getAngle(FromX, FromY);
+		float b = activeBezier->getAngle(ToX, ToY);
+		float c = b - a;
+		activeBezier->turn(c);
+	}
+	
+	computeSplines();
+}
+
 void SplineObject::moveBezierPoint(float x, float y) {
 	if (activeBezier != beziers.end())
 		activeBezier->move(x, y);

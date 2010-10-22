@@ -23,6 +23,7 @@ public:
 	
 	void addBezierPoint(float *a, float *l, float *r);
 	void turnBezierPoint(float x);
+	void turnBezierPoint(float FromX, float FromY, float ToX, float ToY);
 	void moveBezierPoint(float x, float y);
 	void computeSplines();
 
