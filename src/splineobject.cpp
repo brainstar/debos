@@ -119,6 +119,14 @@ void SplineObject::moveBezierPoint(float x, float y) {
 	computeSplines();
 }
 
+void SplineObject::scaleBezierPoint(float FromX, float FromY, float ToX, float ToY) {
+	if (activeBezier != beziers.end()) {
+		activeBezier->scale(activeBezier->getLength(ToX, ToY) / activeBezier->getLength(FromX, FromY));
+	}
+	
+	computeSplines();
+}
+
 void SplineObject::computeSplines() {
 	list<Spline>::iterator it = splines.begin();
 	while (it != splines.end()) it = splines.erase(it);

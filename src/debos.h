@@ -54,13 +54,14 @@ private:
 	void mouseClickEdit(float x, float y);
 	void grab(float FromX, float FromY, float ToX, float ToY);
 	void rotate(float FromX, float FromY, float ToX, float ToY);
+	void scale(float FromX, float FromY, float ToX, float ToY);
 
 	Document* data;
 	GLDrawer* gl;
 	Mode mode;
 	
 	bool bView; // true, if view modifying operations are allowed
-	bool bGrab, bRotate;
+	bool bGrab, bRotate, bScale;
 	float iMouse[2], iPos[2];
 };
 
