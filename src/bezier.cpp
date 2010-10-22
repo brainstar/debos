@@ -102,6 +102,15 @@ float BezierPoint::getAngle(float x, float y) {
 	return angle;
 }
 
+float BezierPoint::getLength(float x, float y) {
+	float a, b;
+	
+	a = x - p[0];
+	b = y - p[1];
+	
+	return sqrtf(a*a + b*b);
+}
+
 void BezierPoint::turn(float degree) {
 	float x = pr[0] - p[0], y = pr[1] - p[1];
 	float l = sqrtf(x*x + y*y);
@@ -143,4 +152,11 @@ void BezierPoint::move(float x, float y) {
 	a[2] = p[2];
 	
 	setp(a);
+}
+
+void BezierPoint::scale(float factor) {
+	for (int i = 0; i < 3; i++) {
+		pr[i] = (pr[i] - p[i]) * factor + p[i];
+		pl[i] = (pl[i] - p[i]) * factor + p[i];
+	}
 }

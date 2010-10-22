@@ -25,6 +25,7 @@ public:
 	void turnBezierPoint(float x);
 	void turnBezierPoint(float FromX, float FromY, float ToX, float ToY);
 	void moveBezierPoint(float x, float y);
+	void scaleBezierPoint(float FromX, float FromY, float ToX, float ToY);
 	void computeSplines();
 
 	list<Spline> splines;

@@ -17,9 +17,11 @@ public:
 	void setpr(float *a);
 	
 	float getAngle(float x, float y);
+	float getLength(float x, float y);
 	
 	void turn(float degree);
 	void move(float x, float y);
+	void scale(float factor);
 
 private:
 	float p[3], pl[3], pr[3];

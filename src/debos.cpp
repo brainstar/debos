@@ -16,6 +16,7 @@ Debos::Debos() {
 	bView = false;
 	bGrab = false;
 	bRotate = false;
+	bScale = false;
 
 	// Creating GUI
 	this->resize(500,500);
@@ -176,10 +177,15 @@ void Debos::mouseMove(int ix, int iy) {
 			gl->ptc(ix, iy, &x, &y);
 			grab(iMouse[0], iMouse[1], x, y);
 		}
-		if (bRotate) {
+		else if (bRotate) {
 			float x, y;
 			gl->ptc(ix, iy, &x, &y);
 			rotate(iMouse[0], iMouse[1], x, y);
+		}
+		else if (bScale) {
+			float x, y;
+			gl->ptc(ix, iy, &x, &y);
+			scale(iMouse[0], iMouse[1], x, y);
 		}
 		gl->updateGL();
 	}
@@ -305,6 +311,11 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 					bRotate = false;
 					bView = false;
 				}
+				else if (bScale) {
+					scale(iMouse[0], iMouse[1], iPos[0], iPos[1]);
+					bScale = false;
+					bView = false;
+				}
 			}
 			// Alt Modifier is used for moving operations
 			else if (event->modifiers() & Qt::AltModifier) {
@@ -374,6 +385,19 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 					}
 				}
 				
+				// Scale BezierPoint
+				else if (event->key() == Qt::Key_S) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE) {
+							SplineObject *so = (SplineObject*) obj;
+							if (so->beziers.begin() != so->beziers.end()) {
+								bScale = true;
+								bView = false;
+							}
+						}
+					}
+				}
 				// Close Bezier-Curve
 				else if (event->key() == Qt::Key_C) {
 					Object *obj = data->getObject();
@@ -450,7 +474,11 @@ void Debos::mouseClickEdit(float x, float y) {
 	}
 	else if (bRotate) {
 		bRotate = false;
-		bView = true;
+		bView = false;
+	}
+	else if (bScale) {
+		bScale = false;
+		bView = false;
 	}
 	else {
 		Object *obj;
@@ -483,4 +511,14 @@ void Debos::rotate(float FromX, float FromY, float ToX, float ToY) {
 		}
 	}
 	float a, b, diff[2];
+}
+
+void Debos::scale(float FromX, float FromY, float ToX, float ToY) {
+	Object *obj = data->getObject();
+	if (obj) {
+		if (obj->type == SPLINE) {
+			SplineObject *so = (SplineObject*) obj;
+			so->scaleBezierPoint(FromX, FromY, ToX, ToY);
+		}
+	}
 }
