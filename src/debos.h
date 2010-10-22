@@ -52,12 +52,15 @@ signals:
 private:
 	void mouseClickView(float x, float y);
 	void mouseClickEdit(float x, float y);
+	void grab(float FromX, float FromY, float ToX, float ToY);
+	void rotate(float FromX, float FromY, float ToX, float ToY);
 
 	Document* data;
 	GLDrawer* gl;
 	Mode mode;
 	
-	bool bGrab;
+	bool bView; // true, if view modifying operations are allowed
+	bool bGrab, bRotate;
 	float iMouse[2], iPos[2];
 };
 

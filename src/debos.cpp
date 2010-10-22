@@ -13,7 +13,9 @@ Debos::Debos() {
 	// Initializing interactive variables
 	setMouseTracking(true);
 	grabMouse();
+	bView = false;
 	bGrab = false;
+	bRotate = false;
 
 	// Creating GUI
 	this->resize(500,500);
@@ -170,17 +172,14 @@ void Debos::mouseClick(float x, float y) {
 void Debos::mouseMove(int ix, int iy) {
 	if (data) {
 		if (bGrab) {
-			float diff[2], x, y;
+			float x, y;
 			gl->ptc(ix, iy, &x, &y);
-			diff[0] = x - iMouse[0];
-			diff[1] = y - iMouse[1];
-			Object *obj = data->getObject();
-			if (obj) {
-				if (obj->type == SPLINE) {
-					SplineObject *so = (SplineObject*) obj;
-					so->moveBezierPoint(diff[0], diff[1]);
-				}
-			}
+			grab(iMouse[0], iMouse[1], x, y);
+		}
+		if (bRotate) {
+			float x, y;
+			gl->ptc(ix, iy, &x, &y);
+			rotate(iMouse[0], iMouse[1], x, y);
 		}
 		gl->updateGL();
 	}
@@ -207,64 +206,66 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 			else if(event->key() == Qt::Key_E)
 				activateMode(EDIT);
 
-			// Move camera to the left
-			else if (event->key() == Qt::Key_Left) {
-				float *g = data->getGrid();
-				float w = (*(g+1)) - (*g);
-				*g -= w / 20.0;
-				*(g + 1) -= w / 20.0;
-				gl->simResize();
-			}
+			if (bView) {
+				// Move camera to the left
+				if (event->key() == Qt::Key_Left) {
+					float *g = data->getGrid();
+					float w = (*(g+1)) - (*g);
+					*g -= w / 20.0;
+					*(g + 1) -= w / 20.0;
+					gl->simResize();
+				}
 
-			// Move camera to the right
-			else if (event->key() == Qt::Key_Right) {
-				float *g = data->getGrid();
-				float w = (*(g+1)) - (*g);
-				*g += w / 20.0;
-				*(g + 1) += w / 20.0;
-				gl->simResize();
-			}
+				// Move camera to the right
+				else if (event->key() == Qt::Key_Right) {
+					float *g = data->getGrid();
+					float w = (*(g+1)) - (*g);
+					*g += w / 20.0;
+					*(g + 1) += w / 20.0;
+					gl->simResize();
+				}
 
-			// Move camera down
-			else if (event->key() == Qt::Key_Down) {
-				float *g = data->getGrid();
-				float h = (*(g+3)) - (*(g+2));
-				*(g + 2) -= h / 20.0;
-				*(g + 3) -= h / 20.0;
-				gl->simResize();
-			}
+				// Move camera down
+				else if (event->key() == Qt::Key_Down) {
+					float *g = data->getGrid();
+					float h = (*(g+3)) - (*(g+2));
+					*(g + 2) -= h / 20.0;
+					*(g + 3) -= h / 20.0;
+					gl->simResize();
+				}
 
-			// Move camera up
-			else if (event->key() == Qt::Key_Up) {
-				float *g = data->getGrid();
-				float h = (*(g+3)) - (*(g+2));
-				*(g + 2) += h / 20.0;
-				*(g + 3) += h / 20.0;
-				gl->simResize();
-			}
+				// Move camera up
+				else if (event->key() == Qt::Key_Up) {
+					float *g = data->getGrid();
+					float h = (*(g+3)) - (*(g+2));
+					*(g + 2) += h / 20.0;
+					*(g + 3) += h / 20.0;
+					gl->simResize();
+				}
 
-			// Zoom in
-			if (event->key() == Qt::Key_Plus) {
-				float *g = data->getGrid();
-				float w = (*(g+1)) - (*g);
-				float h = (*(g+3)) - (*(g+2));
-				*g += w / 40.0;
-				*(g+1) -= w / 40.0;
-				*(g+2) += h / 40.0;
-				*(g+3) -= h / 40.0;
-				gl->simResize();
-			}
+				// Zoom in
+				if (event->key() == Qt::Key_Plus) {
+					float *g = data->getGrid();
+					float w = (*(g+1)) - (*g);
+					float h = (*(g+3)) - (*(g+2));
+					*g += w / 40.0;
+					*(g+1) -= w / 40.0;
+					*(g+2) += h / 40.0;
+					*(g+3) -= h / 40.0;
+					gl->simResize();
+				}
 			
-			// Zoom out
-			if (event->key() == Qt::Key_Minus) {
-				float *g = data->getGrid();
-				float w = (*(g+1)) - (*g);	
-				float h = (*(g+3)) - (*(g+2));
-				*g -= w / 40.0;
-				*(g+1) += w / 40.0;
-				*(g+2) -= h / 40.0;
-				*(g+3) += h / 40.0;
-				gl->simResize();
+				// Zoom out
+				if (event->key() == Qt::Key_Minus) {
+					float *g = data->getGrid();
+					float w = (*(g+1)) - (*g);	
+					float h = (*(g+3)) - (*(g+2));
+					*g -= w / 40.0;
+					*(g+1) += w / 40.0;
+					*(g+2) -= h / 40.0;
+					*(g+3) += h / 40.0;
+					gl->simResize();
+				}
 			}
 		}
 
@@ -294,21 +295,15 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 		
 		// Edit mode is active
 		else if (mode == EDIT) {
-			if (event->key() == Qt::Key_Escape)
-			{
-				if (bGrab)
-				{
-					float diff[2];
-					diff[0] = iPos[0] - iMouse[0];
-					diff[1] = iPos[1] - iMouse[1];
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE) {
-							SplineObject *so = (SplineObject*) obj;
-							so->moveBezierPoint(diff[0], diff[1]);
-						}
-					}
+			if (event->key() == Qt::Key_Escape) {
+				if (bGrab) {
+					grab(iMouse[0], iMouse[1], iPos[0], iPos[1]);
 					bGrab = false;
+				}
+				else if (bRotate) {
+					rotate(iMouse[0], iMouse[1], iPos[0], iPos[1]);
+					bRotate = false;
+					bView = false;
 				}
 			}
 			// Alt Modifier is used for moving operations
@@ -356,6 +351,22 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 							SplineObject *so = (SplineObject*) obj;
 							if (so->beziers.begin() != so->beziers.end()) {
 								bGrab = true;
+								iPos[0] = iMouse[0];
+								iPos[1] = iMouse[1];
+							}
+						}
+					}
+				}
+				
+				// Rotate BezierPoint
+				else if (event->key() == Qt::Key_R) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE) {
+							SplineObject *so = (SplineObject*) obj;
+							if (so->beziers.begin() != so->beziers.end()) {
+								bRotate = true;
+								bView = false;
 								iPos[0] = iMouse[0];
 								iPos[1] = iMouse[1];
 							}
@@ -437,6 +448,10 @@ void Debos::mouseClickEdit(float x, float y) {
 	if (bGrab) {
 		bGrab = false;
 	}
+	else if (bRotate) {
+		bRotate = false;
+		bView = true;
+	}
 	else {
 		Object *obj;
 		if (obj = data->getObject()) {
@@ -444,4 +459,28 @@ void Debos::mouseClickEdit(float x, float y) {
 			gl->updateGL();
 		}
 	}
+}
+
+void Debos::grab(float FromX, float FromY, float ToX, float ToY) {
+	float diff[2];
+	diff[0] = ToX - FromX;
+	diff[1] = ToY - FromY;
+	Object *obj = data->getObject();
+	if (obj) {
+		if (obj->type == SPLINE) {
+			SplineObject *so = (SplineObject*) obj;
+			so->moveBezierPoint(diff[0], diff[1]);
+		}
+	}
+}
+
+void Debos::rotate(float FromX, float FromY, float ToX, float ToY) {
+	Object *obj = data->getObject();
+	if (obj) {
+		if (obj->type == SPLINE) {
+			SplineObject *so = (SplineObject*) obj;
+			so->turnBezierPoint(FromX, FromY, ToX, ToY);
+		}
+	}
+	float a, b, diff[2];
 }

@@ -1,6 +1,7 @@
 #include "bezier.h"
 #include <math.h>
 #include <Qt/qwidget.h>
+#define PI 3.1415926
 using namespace std;
 
 BezierPoint::BezierPoint(float *a, float *b, float *c) {
@@ -50,7 +51,7 @@ void BezierPoint::setpl(float *a) {
 	else
 		phi = -acosf(x / l);	
 
-	phi += 3.1415926;
+	phi += PI;
 	
 	x = pr[0] - p[0]; y = pr[1] - p[1];
 	l = sqrtf(x*x + y*y);
@@ -74,7 +75,7 @@ void BezierPoint::setpr(float *a) {
 	else
 		phi = -acosf(x / l);	
 
-	phi += 3.1415926;
+	phi += PI;
 	
 	x = pl[0] - p[0]; y = pl[1] - p[1];
 	l = sqrtf(x*x + y*y);
@@ -84,6 +85,21 @@ void BezierPoint::setpr(float *a) {
 	
 	for (int i = 0; i < 3; i++)
 		pr[i] = a[i];
+}
+
+float BezierPoint::getAngle(float x, float y) {
+	float a, b, c, angle;
+	
+	a = x - p[0];
+	b = y - p[1];
+	c = sqrtf(a*a + b*b);
+	
+	angle = acosf(a / c) * 180. / PI;
+	if (b / c > 0.) {
+		angle = 0. - angle;
+	}
+	
+	return angle;
 }
 
 void BezierPoint::turn(float degree) {
@@ -104,7 +120,7 @@ void BezierPoint::turn(float degree) {
 		phi = acosf(x / l);
 	else
 		phi = -acosf(x / l);
-	phi -= (degree / 180. * 3.1415926);
+	phi -= (degree / 180. * PI);
 	
 	x = l * cosf(phi);
 	y = l * sinf(phi);

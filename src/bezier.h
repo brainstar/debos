@@ -16,6 +16,8 @@ public:
 	void setpl(float *a);
 	void setpr(float *a);
 	
+	float getAngle(float x, float y);
+	
 	void turn(float degree);
 	void move(float x, float y);
 
