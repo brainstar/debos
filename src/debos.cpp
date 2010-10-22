@@ -167,24 +167,24 @@ void Debos::mouseClick(float x, float y) {
 		mouseClickEdit(x, y);
 }
 
-void Debos::mouseMove(int x, int y) {
+void Debos::mouseMove(int ix, int iy) {
 	if (data) {
 		if (bGrab) {
-			int diff[2];
+			float diff[2], x, y;
+			gl->ptc(ix, iy, &x, &y);
 			diff[0] = x - iMouse[0];
-			diff[1] = iMouse[1] - y;
+			diff[1] = y - iMouse[1];
 			Object *obj = data->getObject();
 			if (obj) {
 				if (obj->type == SPLINE) {
 					SplineObject *so = (SplineObject*) obj;
-					so->moveBezierPoint((float) diff[0] / 50., (float) diff[1] / 50.);
+					so->moveBezierPoint(diff[0], diff[1]);
 				}
 			}
 		}
-		iMouse[0] = x;
-		iMouse[1] = y;
 		gl->updateGL();
 	}
+	gl->ptc(ix, iy, &iMouse[0], &iMouse[1]);
 }
 
 void Debos::mouseMoveEvent(QMouseEvent *event) {
@@ -294,8 +294,25 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 		
 		// Edit mode is active
 		else if (mode == EDIT) {
+			if (event->key() == Qt::Key_Escape)
+			{
+				if (bGrab)
+				{
+					float diff[2];
+					diff[0] = iPos[0] - iMouse[0];
+					diff[1] = iPos[1] - iMouse[1];
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE) {
+							SplineObject *so = (SplineObject*) obj;
+							so->moveBezierPoint(diff[0], diff[1]);
+						}
+					}
+					bGrab = false;
+				}
+			}
 			// Alt Modifier is used for moving operations
-			if (event->modifiers() & Qt::AltModifier) {
+			else if (event->modifiers() & Qt::AltModifier) {
 				// Move BezierPoint
 				if (event->key() == Qt::Key_Down) {
 					Object *obj = data->getObject();
@@ -339,7 +356,21 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 							SplineObject *so = (SplineObject*) obj;
 							if (so->beziers.begin() != so->beziers.end()) {
 								bGrab = true;
+								iPos[0] = iMouse[0];
+								iPos[1] = iMouse[1];
 							}
+						}
+					}
+				}
+				
+				// Close Bezier-Curve
+				else if (event->key() == Qt::Key_C) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE) {
+							SplineObject *so = (SplineObject*) obj;
+							so->bClosed = !(so->bClosed);
+							so->computeSplines();
 						}
 					}
 				}

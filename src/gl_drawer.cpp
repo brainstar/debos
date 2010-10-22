@@ -15,6 +15,13 @@ GLDrawer::GLDrawer(QWidget *parent, char *name) : QGLWidget(parent) {
 GLDrawer::~GLDrawer() {
 }
 
+void GLDrawer::ptc(int x, int y, float *fx, float *fy) {
+	float w = (float) size().width();
+	float h = (float) size().height();
+	*fx = ((float) x / w) * (display[1] - display[0]) + display[0];
+	*fy = (1. - (float) y / h) * (display[3] - display[2]) + display[2];
+}
+
 void GLDrawer::initializeGL() {
 	// Initializing OpenGL
 	glShadeModel(GL_SMOOTH);

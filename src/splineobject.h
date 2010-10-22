@@ -28,6 +28,9 @@ public:
 
 	list<Spline> splines;
 	list<BezierPoint> beziers;
+	
+	bool bClosed;
+	
 private:
 	list<BezierPoint>::iterator activeBezier;
 };

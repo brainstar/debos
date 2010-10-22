@@ -24,6 +24,7 @@ public:
 	Document* data;
 
 	void simResize();
+	void ptc(int x, int y, float *fx, float *fy);
 
 signals:
 	void mouseClicked( float x, float y );
