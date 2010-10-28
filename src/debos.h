@@ -21,6 +21,14 @@ enum Mode {
 	EDIT
 };
 
+enum Edit {
+	NONE,
+	GRAB,
+	ROTATE,
+	SCALE,
+	ADD
+};
+
 class Debos : public QWidget {
 Q_OBJECT;
 
@@ -58,10 +66,12 @@ private:
 
 	Document* data;
 	GLDrawer* gl;
+	QStatusBar* statusbarMode;
+	QStatusBar* statusbarEdit;
 	Mode mode;
 	
-	bool bView; // true, if view modifying operations are allowed
-	bool bGrab, bRotate, bScale;
+	bool bView; // false, if view modifying operations are allowed
+	Edit edit;
 	float iMouse[2], iPos[2];
 };
 
