@@ -22,9 +22,11 @@ public:
 	void turn(float degree);
 	void move(float x, float y);
 	void scale(float factor);
+	void save();
+	void recover();
 
 private:
-	float p[3], pl[3], pr[3];
+	float p[3], pl[3], pr[3], old[6];
 };
 
 #endif
