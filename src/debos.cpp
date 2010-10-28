@@ -14,9 +14,7 @@ Debos::Debos() {
 	setMouseTracking(true);
 	grabMouse();
 	bView = false;
-	bGrab = false;
-	bRotate = false;
-	bScale = false;
+	edit = NONE;
 
 	// Creating GUI
 	this->resize(500,500);
@@ -54,11 +52,21 @@ Debos::Debos() {
 	connect(action, SIGNAL(triggered()), this, SLOT(aboutDebos()));
 
 	gl = new GLDrawer();
-
+	
+	statusbarMode = new QStatusBar();
+	statusbarEdit = new QStatusBar();
+	
 	QVBoxLayout* layout = new QVBoxLayout();
+	QHBoxLayout* lay = new QHBoxLayout();
+	
+	lay->addWidget(statusbarMode);
+	lay->addWidget(statusbarEdit);
+	
 	layout->addWidget(menubar);
 	layout->addStretch(0.5);
 	layout->addWidget(gl, 1);
+	layout->addStretch(0.5);
+	layout->addLayout(lay);
 	layout->setSpacing(0);
 	layout->setMargin(0);
 
@@ -74,7 +82,7 @@ Debos::Debos() {
 		newFile();
 	}
 
-	connect( gl, SIGNAL(mouseClicked(float, float)), this, SLOT(mouseClick(float, float)) );
+	connect(gl, SIGNAL(mouseClicked(float, float)), this, SLOT(mouseClick(float, float)));
 	connect(gl, SIGNAL(mouseMoved(int, int)), this, SLOT(mouseMove(int, int)));
 	connect(gl, SIGNAL(draw()), this, SLOT(draw()));
 
@@ -92,6 +100,7 @@ void Debos::newFile() {
 	gl->show();
 	gl->simResize();
 	mode = VIEW;
+	statusbarMode->showMessage("View Mode");
 	qDebug("Creating new file");
 }
 
@@ -111,11 +120,13 @@ bool Debos::loadFile(QString filename) {
 			gl->simResize();
 			gl->show();
 			mode = VIEW;
+			statusbarMode->showMessage("View Mode");
 			qDebug("Loading successful");
 			return true;
 		}
 		else {
 			delete doc;
+			statusbarMode->clearMessage();
 			qDebug("Loading not successful");
 		}
 	}
@@ -146,6 +157,7 @@ void Debos::closeFile() {
 		qDebug("Closing file");
 	}
 	gl->data = data = 0;
+	statusbarMode->clearMessage();
 }
 
 void Debos::aboutDebos() {
@@ -172,17 +184,17 @@ void Debos::mouseClick(float x, float y) {
 
 void Debos::mouseMove(int ix, int iy) {
 	if (data) {
-		if (bGrab) {
+		if (edit == GRAB) {
 			float x, y;
 			gl->ptc(ix, iy, &x, &y);
 			grab(iMouse[0], iMouse[1], x, y);
 		}
-		else if (bRotate) {
+		else if (edit == ROTATE) {
 			float x, y;
 			gl->ptc(ix, iy, &x, &y);
 			rotate(iMouse[0], iMouse[1], x, y);
 		}
-		else if (bScale) {
+		else if (edit == SCALE) {
 			float x, y;
 			gl->ptc(ix, iy, &x, &y);
 			scale(iPos[0], iPos[1], x, y);
@@ -207,10 +219,14 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 		// Actions not related to specific modes use the Shift modifier
 		if (event->modifiers() & Qt::ControlModifier) {
 			// Activate modes
-			if(event->key() == Qt::Key_V)
+			if(event->key() == Qt::Key_V) {
 				activateMode(VIEW);
-			else if(event->key() == Qt::Key_E)
+				statusbarMode->showMessage("View Mode");
+			}
+			else if(event->key() == Qt::Key_E) {
 				activateMode(EDIT);
+				statusbarMode->showMessage("Edit Mode");
+			}
 
 			if (!bView) {
 				// Move camera to the left
@@ -302,16 +318,16 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 		// Edit mode is active
 		else if (mode == EDIT) {
 			if (event->key() == Qt::Key_Escape) {
-				if (bGrab) {
+				if (edit == GRAB) {
 					grab(iMouse[0], iMouse[1], iPos[0], iPos[1]);
-					bGrab = false;
+					edit = NONE;
 				}
-				else if (bRotate) {
+				else if (edit == ROTATE) {
 					rotate(iMouse[0], iMouse[1], iPos[0], iPos[1]);
-					bRotate = false;
+					edit = NONE;
 					bView = false;
 				}
-				else if (bScale) {
+				else if (edit == SCALE) {
 					Object *obj = data->getObject();
 					if (obj) {
 						if (obj->type == SPLINE) {
@@ -319,9 +335,13 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 							so->recoverBezierPoint();
 						}
 					}
-					bScale = false;
+					edit = NONE;
 					bView = false;
 				}
+				else if (edit == ADD) {
+					edit = NONE;
+				}
+				statusbarEdit->clearMessage();
 			}
 			// Alt Modifier is used for moving operations
 			else if (event->modifiers() & Qt::AltModifier) {
@@ -359,68 +379,9 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				}
 			}
 			
-			else {
-				// Move BezierPoint
-				if (event->key() == Qt::Key_G) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE) {
-							SplineObject *so = (SplineObject*) obj;
-							if (so->beziers.begin() != so->beziers.end()) {
-								bGrab = true;
-								iPos[0] = iMouse[0];
-								iPos[1] = iMouse[1];
-							}
-						}
-					}
-				}
-				
-				// Rotate BezierPoint
-				else if (event->key() == Qt::Key_R) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE) {
-							SplineObject *so = (SplineObject*) obj;
-							if (so->beziers.begin() != so->beziers.end()) {
-								bRotate = true;
-								bView = true;
-								iPos[0] = iMouse[0];
-								iPos[1] = iMouse[1];
-							}
-						}
-					}
-				}
-				
-				// Scale BezierPoint
-				else if (event->key() == Qt::Key_S) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE) {
-							SplineObject *so = (SplineObject*) obj;
-							if (so->beziers.begin() != so->beziers.end()) {
-								so->saveBezierPoint();
-								bScale = true;
-								bView = true;
-								iPos[0] = iMouse[0];
-								iPos[1] = iMouse[1];
-							}
-						}
-					}
-				}
-				// Close Bezier-Curve
-				else if (event->key() == Qt::Key_C) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE) {
-							SplineObject *so = (SplineObject*) obj;
-							so->bClosed = !(so->bClosed);
-							so->computeSplines();
-						}
-					}
-				}
-				
+			else {				
 				// Select previous BezierPoint
-				else if (event->key() == Qt::Key_Down) {
+				if (event->key() == Qt::Key_Down) {
 					Object *obj = data->getObject();
 					if (obj) {
 						obj->prevInstance();
@@ -460,6 +421,79 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 					}
 				}
 			}
+			
+			if (edit == NONE) {
+				// Move BezierPoint
+				if (event->key() == Qt::Key_G) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE) {
+							SplineObject *so = (SplineObject*) obj;
+							if (so->beziers.begin() != so->beziers.end()) {
+								edit = GRAB;
+								statusbarEdit->showMessage("Grab");
+								iPos[0] = iMouse[0];
+								iPos[1] = iMouse[1];
+							}
+						}
+					}
+				}
+				
+				// Rotate BezierPoint
+				else if (event->key() == Qt::Key_R) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE) {
+							SplineObject *so = (SplineObject*) obj;
+							if (so->beziers.begin() != so->beziers.end()) {
+								edit = ROTATE;
+								statusbarEdit->showMessage("Rotate");
+								bView = true;
+								iPos[0] = iMouse[0];
+								iPos[1] = iMouse[1];
+							}
+						}
+					}
+				}
+				
+				// Scale BezierPoint
+				else if (event->key() == Qt::Key_S) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE) {
+							SplineObject *so = (SplineObject*) obj;
+							if (so->beziers.begin() != so->beziers.end()) {
+								so->saveBezierPoint();
+								edit = SCALE;
+								statusbarEdit->showMessage("Scale");
+								bView = true;
+								iPos[0] = iMouse[0];
+								iPos[1] = iMouse[1];
+							}
+						}
+					}
+				}
+				
+				// Close Bezier-Curve
+				else if (event->key() == Qt::Key_C) {
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE) {
+							SplineObject *so = (SplineObject*) obj;
+							so->bClosed = !(so->bClosed);
+							so->computeSplines();
+						}
+					}
+				}
+				
+				// Add BezierPoints
+				else if (event->key() == Qt::Key_A) {
+					if (data->getObject()) {
+						edit = ADD;
+						statusbarEdit->showMessage("Add");
+					}
+				}
+			}
 		}
 	}
 
@@ -478,23 +512,17 @@ void Debos::mouseClickView(float x, float y) {
 }
 
 void Debos::mouseClickEdit(float x, float y) {
-	if (bGrab) {
-		bGrab = false;
-	}
-	else if (bRotate) {
-		bRotate = false;
-		bView = false;
-	}
-	else if (bScale) {
-		bScale = false;
-		bView = false;
-	}
-	else {
+	if (edit == ADD) {
 		Object *obj;
 		if (obj = data->getObject()) {
 			obj->addPoint(x, y, 0.0);
 			gl->updateGL();
 		}
+	}
+	else if (edit != NONE) {
+		edit = NONE;
+		bView = false;
+		statusbarEdit->clearMessage();
 	}
 }
 
