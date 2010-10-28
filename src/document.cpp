@@ -100,6 +100,7 @@ bool Document::save(string filename) {
 			if ((*iter)->type == SPLINE) {
 				element = new TiXmlElement("spline");
 				SplineObject *so = (SplineObject*) (*iter);
+				element->SetAttribute("closed", so->bClosed);
 				list<BezierPoint>::iterator it;
 				for (it = so->beziers.begin(); it != so->beziers.end(); it++) {
 					float *p;

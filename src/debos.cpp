@@ -185,7 +185,7 @@ void Debos::mouseMove(int ix, int iy) {
 		else if (bScale) {
 			float x, y;
 			gl->ptc(ix, iy, &x, &y);
-			scale(iMouse[0], iMouse[1], x, y);
+			scale(iPos[0], iPos[1], x, y);
 		}
 		gl->updateGL();
 	}
@@ -212,7 +212,7 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 			else if(event->key() == Qt::Key_E)
 				activateMode(EDIT);
 
-			if (bView) {
+			if (!bView) {
 				// Move camera to the left
 				if (event->key() == Qt::Key_Left) {
 					float *g = data->getGrid();
@@ -312,7 +312,13 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 					bView = false;
 				}
 				else if (bScale) {
-					scale(iMouse[0], iMouse[1], iPos[0], iPos[1]);
+					Object *obj = data->getObject();
+					if (obj) {
+						if (obj->type == SPLINE) {
+							SplineObject *so = (SplineObject*) obj;
+							so->recoverBezierPoint();
+						}
+					}
 					bScale = false;
 					bView = false;
 				}
@@ -377,7 +383,7 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 							SplineObject *so = (SplineObject*) obj;
 							if (so->beziers.begin() != so->beziers.end()) {
 								bRotate = true;
-								bView = false;
+								bView = true;
 								iPos[0] = iMouse[0];
 								iPos[1] = iMouse[1];
 							}
@@ -392,8 +398,11 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 						if (obj->type == SPLINE) {
 							SplineObject *so = (SplineObject*) obj;
 							if (so->beziers.begin() != so->beziers.end()) {
+								so->saveBezierPoint();
 								bScale = true;
-								bView = false;
+								bView = true;
+								iPos[0] = iMouse[0];
+								iPos[1] = iMouse[1];
 							}
 						}
 					}

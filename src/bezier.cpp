@@ -156,7 +156,21 @@ void BezierPoint::move(float x, float y) {
 
 void BezierPoint::scale(float factor) {
 	for (int i = 0; i < 3; i++) {
-		pr[i] = (pr[i] - p[i]) * factor + p[i];
-		pl[i] = (pl[i] - p[i]) * factor + p[i];
+		pr[i] = (old[i + 3] - p[i]) * factor + p[i];
+		pl[i] = (old[i] - p[i]) * factor + p[i];
+	}
+}
+
+void BezierPoint::save() {
+	for (int i = 0; i < 3; i++) {
+		old[i] = pl[i];
+		old[i + 3] = pr[i];
+	}
+}
+
+void BezierPoint::recover() {
+	for (int i = 0; i < 3; i++) {
+		pl[i] = old[i];
+		pr[i] = old[i + 3];
 	}
 }
