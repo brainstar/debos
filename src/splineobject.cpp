@@ -10,29 +10,33 @@ SplineObject::SplineObject() {
 	bClosed = false;
 }
 
-void SplineObject::nextInstance() {
-	if (activeBezier == beziers.end()) return;
+bool SplineObject::nextInstance() {
+	if (activeBezier == beziers.end()) { return false; }
+	
 	activeBezier++;
 	if (activeBezier == beziers.end()) {
 		if (bClosed) {
 			activeBezier = beziers.begin();
+			return true;
 		}
 		else {
 			activeBezier--;
+			return false;
 		}
 	}
 }
 
-void SplineObject::prevInstance() {
+bool SplineObject::prevInstance() {
 	if (activeBezier == beziers.begin()) {
 		if (bClosed) {
 			activeBezier = beziers.end();
 		}
 		else {
-			return;
+			return false;
 		}
 	}
 	activeBezier--;
+	return true;
 }
 
 void SplineObject::deleteInstance() {

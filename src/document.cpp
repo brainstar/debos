@@ -27,14 +27,16 @@ void Document::addSplineObject() {
 	activeObject--;
 }
 
-void Document::deleteObject() {
+bool Document::deleteObject() {
 	// Delete selected Object
 	if (activeObject != objects.end()) {
 		activeObject = objects.erase(activeObject);
 		if (activeObject == objects.end())
 			activeObject--;
 		qDebug("removed Object");
+		return true;
 	}
+	return false;
 }
 
 void Document::nextObject() {

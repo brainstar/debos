@@ -12,7 +12,7 @@ public:
 	void draw(bool edit);
 	
 	void addSplineObject();
-	void deleteObject();
+	bool deleteObject();
 
 	void nextObject();
 	void prevObject();
