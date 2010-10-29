@@ -12,8 +12,8 @@ class Object {
 public:
 	virtual void draw(bool edit) {};
 	
-	virtual void nextInstance() {};
-	virtual void prevInstance() {};
+	virtual bool nextInstance() {};
+	virtual bool prevInstance() {};
 	virtual void deleteInstance() {};
 
 	virtual bool addPoint(float x, float y, float z) {};

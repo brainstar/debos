@@ -13,7 +13,7 @@ Debos::Debos() {
 	// Initializing interactive variables
 	setMouseTracking(true);
 	grabMouse();
-	bView = false;
+	bView = true;
 	edit = NONE;
 
 	// Creating GUI
@@ -55,12 +55,15 @@ Debos::Debos() {
 	
 	statusbarMode = new QStatusBar();
 	statusbarEdit = new QStatusBar();
+	statusbarAction = new QStatusBar();
 	
-	QVBoxLayout* layout = new QVBoxLayout();
 	QHBoxLayout* lay = new QHBoxLayout();
 	
-	lay->addWidget(statusbarMode);
-	lay->addWidget(statusbarEdit);
+	lay->addWidget(statusbarMode, 1);
+	lay->addWidget(statusbarEdit, 2);
+	lay->addWidget(statusbarAction, 2);
+	
+	QVBoxLayout* layout = new QVBoxLayout();
 	
 	layout->addWidget(menubar);
 	layout->addStretch(0.5);
@@ -73,6 +76,9 @@ Debos::Debos() {
 	this->setLayout(layout);
 
 	this->setWindowTitle("debos");
+	
+	timerAction = new QTimer();
+	timerAction->setSingleShot(true);
 
 	// Loading default file
 	data = 0;
@@ -85,8 +91,9 @@ Debos::Debos() {
 	connect(gl, SIGNAL(mouseClicked(float, float)), this, SLOT(mouseClick(float, float)));
 	connect(gl, SIGNAL(mouseMoved(int, int)), this, SLOT(mouseMove(int, int)));
 	connect(gl, SIGNAL(draw()), this, SLOT(draw()));
+	connect(timerAction, SIGNAL(timeout()), this, SLOT(clearActionBar()));
 
-	gl->show();	
+	gl->show();
 }
 
 Debos::~Debos() {
@@ -96,17 +103,20 @@ void Debos::newFile() {
 	// Creat empty file
 	gl->hide();
 	if (data) delete data;
+	
 	gl->data = data = new Document;
 	gl->show();
 	gl->simResize();
+	
 	mode = VIEW;
 	statusbarMode->showMessage("View Mode");
+	setActionBar("New File created");
 	qDebug("Creating new file");
 }
 
 bool Debos::loadFile() {
 	// Load file with dialog
-	QString filename = QFileDialog::getOpenFileName(this, "Open File", "test.xml", "XML Files (*.xml)");
+	QString filename = QFileDialog::getOpenFileName(this, "Open File", "test.xml", "XML Files (*.xml)");	
 	return loadFile(filename);
 }
 
@@ -119,14 +129,17 @@ bool Debos::loadFile(QString filename) {
 			gl->data = data = doc;
 			gl->simResize();
 			gl->show();
+			
 			mode = VIEW;
 			statusbarMode->showMessage("View Mode");
+			setActionBar("File loaded");
 			qDebug("Loading successful");
 			return true;
 		}
 		else {
 			delete doc;
 			statusbarMode->clearMessage();
+			setActionBar("Loading File not possible");
 			qDebug("Loading not successful");
 		}
 	}
@@ -139,14 +152,17 @@ void Debos::exportFile() {
 	if (!filename.isEmpty()) {
 		gl->getScreen().save( filename, "png" );
 		qDebug("Exporting file to %s", filename.toStdString().c_str());
+		setActionBar("File exported");
 	}
 }
 
 void Debos::saveFile() {
 	// Save file to *.xml file
 	QString filename = QFileDialog::getSaveFileName(this, "Save File", "test.xml", "XML Files (*.xml)");
-	if (!filename.isEmpty())
+	if (!filename.isEmpty()) {
 		data->save(filename.toStdString());
+		setActionBar("File saved");
+	}
 }
 
 void Debos::closeFile() {
@@ -155,6 +171,7 @@ void Debos::closeFile() {
 	if (data) {
 		delete data;
 		qDebug("Closing file");
+		setActionBar("File closed");
 	}
 	gl->data = data = 0;
 	statusbarMode->clearMessage();
@@ -204,6 +221,16 @@ void Debos::mouseMove(int ix, int iy) {
 	gl->ptc(ix, iy, &iMouse[0], &iMouse[1]);
 }
 
+void Debos::clearActionBar() {
+	statusbarAction->clearMessage();
+}
+
+void Debos::setActionBar(QString message) {
+	timerAction->stop();
+	statusbarAction->showMessage(message);
+	timerAction->start(5000);
+}
+
 void Debos::mouseMoveEvent(QMouseEvent *event) {
 	mouseMove(event->globalX(), event->globalY());
 	QWidget::mouseMoveEvent(event);
@@ -220,6 +247,7 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 		if (event->modifiers() & Qt::ControlModifier) {
 			// Activate modes
 			if(event->key() == Qt::Key_V) {
+				editAbort();
 				activateMode(VIEW);
 				statusbarMode->showMessage("View Mode");
 			}
@@ -228,283 +256,85 @@ void Debos::keyPressEvent(QKeyEvent *event) {
 				statusbarMode->showMessage("Edit Mode");
 			}
 
-			if (!bView) {
-				// Move camera to the left
-				if (event->key() == Qt::Key_Left) {
-					float *g = data->getGrid();
-					float w = (*(g+1)) - (*g);
-					*g -= w / 20.0;
-					*(g + 1) -= w / 20.0;
-					gl->simResize();
-				}
-
-				// Move camera to the right
-				else if (event->key() == Qt::Key_Right) {
-					float *g = data->getGrid();
-					float w = (*(g+1)) - (*g);
-					*g += w / 20.0;
-					*(g + 1) += w / 20.0;
-					gl->simResize();
-				}
-
-				// Move camera down
-				else if (event->key() == Qt::Key_Down) {
-					float *g = data->getGrid();
-					float h = (*(g+3)) - (*(g+2));
-					*(g + 2) -= h / 20.0;
-					*(g + 3) -= h / 20.0;
-					gl->simResize();
-				}
-
-				// Move camera up
-				else if (event->key() == Qt::Key_Up) {
-					float *g = data->getGrid();
-					float h = (*(g+3)) - (*(g+2));
-					*(g + 2) += h / 20.0;
-					*(g + 3) += h / 20.0;
-					gl->simResize();
-				}
-
-				// Zoom in
-				if (event->key() == Qt::Key_Plus) {
-					float *g = data->getGrid();
-					float w = (*(g+1)) - (*g);
-					float h = (*(g+3)) - (*(g+2));
-					*g += w / 40.0;
-					*(g+1) -= w / 40.0;
-					*(g+2) += h / 40.0;
-					*(g+3) -= h / 40.0;
-					gl->simResize();
-				}
-			
-				// Zoom out
-				if (event->key() == Qt::Key_Minus) {
-					float *g = data->getGrid();
-					float w = (*(g+1)) - (*g);	
-					float h = (*(g+3)) - (*(g+2));
-					*g -= w / 40.0;
-					*(g+1) += w / 40.0;
-					*(g+2) -= h / 40.0;
-					*(g+3) += h / 40.0;
-					gl->simResize();
-				}
+			// Modification of Viewport allowed
+			if (bView) {
+				// Move camera
+				if (event->key() == Qt::Key_Left) { viewMoveLeft(); }
+				else if (event->key() == Qt::Key_Right) { viewMoveRight(); }
+				else if (event->key() == Qt::Key_Down) { viewMoveDown(); }
+				else if (event->key() == Qt::Key_Up) { viewMoveUp(); }
+				else if (event->key() == Qt::Key_Plus) { viewZoomIn(); }
+				else if (event->key() == Qt::Key_Minus) { viewZoomOut(); }
 			}
 		}
 
 		// View mode is active
 		else if (mode == VIEW) {
-			if (event->key() == Qt::Key_C) {
-				closeFile();
-			}
+			if (event->key() == Qt::Key_C) { closeFile(); }
 			// Select previous Object
-			else if (event->key() == Qt::Key_Down) {
-				data->prevObject();
-			}
+			else if (event->key() == Qt::Key_Down) { data->prevObject(); }
 			// Select next Object
-			else if (event->key() == Qt::Key_Up) {
-				data->nextObject();
-			}
+			else if (event->key() == Qt::Key_Up) { data->nextObject(); }
 			// Add a SplineObject
 			else if (event->key() == Qt::Key_S) {
 				data->addSplineObject();
-				qDebug("added SplineObject");
+				setActionBar("Added Spline-Object");
 			}
 			// Delete an Object
 			else if (event->key() == Qt::Key_X) {
-				data->deleteObject();
+				if (data->deleteObject()) { setActionBar("Object deleted"); }
 			}
 		}
 		
 		// Edit mode is active
 		else if (mode == EDIT) {
 			if (event->key() == Qt::Key_Escape) {
-				if (edit == GRAB) {
-					grab(iMouse[0], iMouse[1], iPos[0], iPos[1]);
-					edit = NONE;
-				}
-				else if (edit == ROTATE) {
-					rotate(iMouse[0], iMouse[1], iPos[0], iPos[1]);
-					edit = NONE;
-					bView = false;
-				}
-				else if (edit == SCALE) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE) {
-							SplineObject *so = (SplineObject*) obj;
-							so->recoverBezierPoint();
-						}
-					}
-					edit = NONE;
-					bView = false;
-				}
-				else if (edit == ADD) {
-					edit = NONE;
-				}
+				editAbort();
 				statusbarEdit->clearMessage();
 			}
 			// Alt Modifier is used for moving operations
 			else if (event->modifiers() & Qt::AltModifier) {
 				// Move BezierPoint
-				if (event->key() == Qt::Key_Down) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE)
-							((SplineObject*)obj)->moveBezierPoint(0., -1.);
-					}
-				}
-				
-				if (event->key() == Qt::Key_Up) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE)
-							((SplineObject*)obj)->moveBezierPoint(0., 1.);
-					}
-				}
-				
-				if (event->key() == Qt::Key_Left) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE)
-							((SplineObject*)obj)->moveBezierPoint(-1., 0.);
-					}
-				}
-				
-				if (event->key() == Qt::Key_Right) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE)
-							((SplineObject*)obj)->moveBezierPoint(1., 0.);
-					}
-				}
+				if (event->key() == Qt::Key_Down) { editMoveBezierPoint(0., -1.); }
+				else if (event->key() == Qt::Key_Up) { editMoveBezierPoint(0., 1.); }
+				else if (event->key() == Qt::Key_Left) { editMoveBezierPoint(-1., 0.); }
+				else if (event->key() == Qt::Key_Right) { editMoveBezierPoint(1., 0.); }
 			}
-			
+			// No Modifier
 			else {				
-				// Select previous BezierPoint
-				if (event->key() == Qt::Key_Down) {
-					Object *obj = data->getObject();
-					if (obj) {
-						obj->prevInstance();
-					}
-				}
-			
-				// Select next BezierPoint
-				else if (event->key() == Qt::Key_Up) {
-					Object *obj = data->getObject();
-					if (obj) {
-						obj->nextInstance();
-					}
-				}
-			
-				// Turn BezierPoint
-				else if (event->key() == Qt::Key_Left) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE)
-							((SplineObject*)obj)->turnBezierPoint(10.);
-					}
-				}
-				else if (event->key() == Qt::Key_Right) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE)
-							((SplineObject*)obj)->turnBezierPoint(-10.);
-					}
-				}
-			
+				// Select previous/next BezierPoint
+				if (event->key() == Qt::Key_Down) { editChangeBezierPoint(1); }
+				else if (event->key() == Qt::Key_Up) { editChangeBezierPoint(-1); }
+				// Rotate BezierPoint
+				else if (event->key() == Qt::Key_Left) { editRotateBezierPoint(1); }
+				else if (event->key() == Qt::Key_Right) { editRotateBezierPoint(-1); }	
 				// Delete BezierPoint
-				else if (event->key() == Qt::Key_Delete) {
-					Object *obj = data->getObject();
-					if (obj) {
-						obj->deleteInstance();
-						gl->updateGL();
-					}
-				}
+				else if (event->key() == Qt::Key_Delete) { editDeleteBezierPoint(); }
 			}
 			
+			// Edit-Buttons allowed
 			if (edit == NONE) {
 				// Move BezierPoint
-				if (event->key() == Qt::Key_G) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE) {
-							SplineObject *so = (SplineObject*) obj;
-							if (so->beziers.begin() != so->beziers.end()) {
-								edit = GRAB;
-								statusbarEdit->showMessage("Grab");
-								iPos[0] = iMouse[0];
-								iPos[1] = iMouse[1];
-							}
-						}
-					}
-				}
-				
+				if (event->key() == Qt::Key_G) { editStartGrab(); }
 				// Rotate BezierPoint
-				else if (event->key() == Qt::Key_R) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE) {
-							SplineObject *so = (SplineObject*) obj;
-							if (so->beziers.begin() != so->beziers.end()) {
-								edit = ROTATE;
-								statusbarEdit->showMessage("Rotate");
-								bView = true;
-								iPos[0] = iMouse[0];
-								iPos[1] = iMouse[1];
-							}
-						}
-					}
-				}
-				
+				else if (event->key() == Qt::Key_R) { editStartRotate(); }
 				// Scale BezierPoint
-				else if (event->key() == Qt::Key_S) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE) {
-							SplineObject *so = (SplineObject*) obj;
-							if (so->beziers.begin() != so->beziers.end()) {
-								so->saveBezierPoint();
-								edit = SCALE;
-								statusbarEdit->showMessage("Scale");
-								bView = true;
-								iPos[0] = iMouse[0];
-								iPos[1] = iMouse[1];
-							}
-						}
-					}
-				}
-				
+				else if (event->key() == Qt::Key_S) { editStartScale(); }
 				// Close Bezier-Curve
-				else if (event->key() == Qt::Key_C) {
-					Object *obj = data->getObject();
-					if (obj) {
-						if (obj->type == SPLINE) {
-							SplineObject *so = (SplineObject*) obj;
-							so->bClosed = !(so->bClosed);
-							so->computeSplines();
-						}
-					}
-				}
-				
+				else if (event->key() == Qt::Key_C) { editCloseCurve(); }
 				// Add BezierPoints
-				else if (event->key() == Qt::Key_A) {
-					if (data->getObject()) {
-						edit = ADD;
-						statusbarEdit->showMessage("Add");
-					}
-				}
+				else if (event->key() == Qt::Key_A) { editStartAdd(); }
 			}
 		}
 	}
 
-	QWidget::keyPressEvent( event ); // important, default key handling
+	QWidget::keyPressEvent(event); // important, default key handling
 	gl->updateGL();
 }
 
 void Debos::activateMode(Mode pMode) {
 	if(mode != pMode) {
 		mode = pMode;
-		qDebug("activating mode %d", mode);
 	}
 }
 
@@ -521,9 +351,226 @@ void Debos::mouseClickEdit(float x, float y) {
 	}
 	else if (edit != NONE) {
 		edit = NONE;
-		bView = false;
+		bView = true;
 		statusbarEdit->clearMessage();
 	}
+}
+
+bool Debos::viewMoveUp() {
+	float *g = data->getGrid();
+	if (!g) return false;
+	
+	float h = (*(g+3)) - (*(g+2));
+	*(g + 2) += h / 20.0;
+	*(g + 3) += h / 20.0;
+	gl->simResize();
+	
+	return true;
+}
+
+bool Debos::viewMoveDown() {
+	float *g = data->getGrid();
+	if (!g) return false;
+	
+	float h = (*(g+3)) - (*(g+2));
+	*(g + 2) -= h / 20.0;
+	*(g + 3) -= h / 20.0;
+	gl->simResize();
+	
+	return true;
+}
+
+bool Debos::viewMoveLeft() {
+	float *g = data->getGrid();
+	if (!g) return false;
+	
+	float w = (*(g+1)) - (*g);
+	*g -= w / 20.0;
+	*(g + 1) -= w / 20.0;
+	gl->simResize();
+	
+	return true;
+}
+
+bool Debos::viewMoveRight() {
+	float *g = data->getGrid();
+	if (!g) return false;
+	
+	float w = (*(g+1)) - (*g);
+	*g += w / 20.0;
+	*(g + 1) += w / 20.0;
+	gl->simResize();
+	
+	return true;
+}
+
+bool Debos::viewZoomIn() {
+	float *g = data->getGrid();
+	if (!g) return false;
+	
+	float w = (*(g+1)) - (*g);
+	float h = (*(g+3)) - (*(g+2));
+	*g += w / 40.0;
+	*(g+1) -= w / 40.0;
+	*(g+2) += h / 40.0;
+	*(g+3) -= h / 40.0;
+	gl->simResize();
+	
+	return true;
+}
+
+bool Debos::viewZoomOut() {
+	float *g = data->getGrid();
+	if (!g) return false;
+	
+	float w = (*(g+1)) - (*g);	
+	float h = (*(g+3)) - (*(g+2));
+	*g -= w / 40.0;
+	*(g+1) += w / 40.0;
+	*(g+2) -= h / 40.0;
+	*(g+3) += h / 40.0;
+	gl->simResize();
+	
+	return true;
+}
+
+bool Debos::editAbort() {
+	if (edit == GRAB) {
+		grab(iMouse[0], iMouse[1], iPos[0], iPos[1]);
+		edit = NONE;
+		setActionBar("Aborted grabbing");
+	}
+	else if (edit == ROTATE) {
+		rotate(iMouse[0], iMouse[1], iPos[0], iPos[1]);
+		edit = NONE;
+		bView = true;
+		setActionBar("Aborted rotating");
+	}
+	else if (edit == SCALE) {
+		Object *obj = data->getObject();
+		if (obj) {
+			if (obj->type == SPLINE) {
+				SplineObject *so = (SplineObject*) obj;
+				so->recoverBezierPoint();
+			}
+		}
+		edit = NONE;
+		bView = true;
+		setActionBar("Aborted scaling");
+	}
+	else if (edit == ADD) {
+		edit = NONE;
+	}
+}
+
+bool Debos::editMoveBezierPoint(float x, float y) {
+	Object *obj = data->getObject();
+	if (obj) {
+		if (obj->type == SPLINE)
+			((SplineObject*)obj)->moveBezierPoint(x, y);
+			return true;
+	}
+	return false;
+}
+
+bool Debos::editStartGrab() {
+	Object *obj = data->getObject();
+	if (obj) {
+		if (obj->type == SPLINE) {
+			SplineObject *so = (SplineObject*) obj;
+			if (so->beziers.begin() != so->beziers.end()) {
+				edit = GRAB;
+				statusbarEdit->showMessage("Grab");
+				iPos[0] = iMouse[0];
+				iPos[1] = iMouse[1];
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool Debos::editStartRotate() {
+	Object *obj = data->getObject();
+	if (obj) {
+		if (obj->type == SPLINE) {
+			SplineObject *so = (SplineObject*) obj;
+			if (so->beziers.begin() != so->beziers.end()) {
+				edit = ROTATE;
+				statusbarEdit->showMessage("Rotate");
+				bView = false;
+				iPos[0] = iMouse[0];
+				iPos[1] = iMouse[1];
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool Debos::editStartScale() {
+	Object *obj = data->getObject();
+	if (obj) {
+		if (obj->type == SPLINE) {
+			SplineObject *so = (SplineObject*) obj;
+			if (so->beziers.begin() != so->beziers.end()) {
+				so->saveBezierPoint();
+				edit = SCALE;
+				statusbarEdit->showMessage("Scale");
+				bView = false;
+				iPos[0] = iMouse[0];
+				iPos[1] = iMouse[1];
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool Debos::editCloseCurve() {
+	Object *obj = data->getObject();
+	if (obj) {
+		if (obj->type == SPLINE) {
+			SplineObject *so = (SplineObject*) obj;
+			so->bClosed = !(so->bClosed);
+			so->computeSplines();
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Debos::editStartAdd() {
+	if (data->getObject()) {
+		edit = ADD;
+		statusbarEdit->showMessage("Add");
+	}
+}
+
+bool Debos::editChangeBezierPoint(int direction) {
+	Object *obj = data->getObject();
+	if (obj) {
+		if (direction > 0) { return obj->nextInstance(); }
+		else { return obj->prevInstance(); }
+	}
+	return false;
+}
+
+bool Debos::editRotateBezierPoint(int direction) {
+	if (Object *obj = data->getObject()) {
+		if (obj->type == SPLINE)
+			((SplineObject*)obj)->turnBezierPoint(10. * direction);
+	}
+}
+
+bool Debos::editDeleteBezierPoint() {
+	Object *obj = data->getObject();
+	if (obj) {
+		obj->deleteInstance();
+		gl->updateGL();
+		return true;
+	}
+	return false;
 }
 
 void Debos::grab(float FromX, float FromY, float ToX, float ToY) {

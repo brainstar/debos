@@ -11,6 +11,8 @@
 #include <Qt/qwidget.h>
 #include <QtGui/QtGui>
 #include <QKeyEvent>
+#include <QTimer>
+#include <QString>
 #include "tinyxml/tinyxml.h"
 #include "document.h"
 #include "gl_drawer.h"
@@ -50,6 +52,9 @@ public slots:
 
 	void mouseClick(float x, float y);
 	void mouseMove(int x, int y);
+	
+	void clearActionBar();
+	void setActionBar(QString message);
 
 protected:
 	void mouseMoveEvent(QMouseEvent *event);
@@ -60,6 +65,25 @@ signals:
 private:
 	void mouseClickView(float x, float y);
 	void mouseClickEdit(float x, float y);
+	
+	bool viewMoveUp();
+	bool viewMoveDown();
+	bool viewMoveLeft();
+	bool viewMoveRight();
+	bool viewZoomIn();
+	bool viewZoomOut();
+	
+	bool editAbort();
+	bool editMoveBezierPoint(float x, float y);
+	bool editStartGrab();
+	bool editStartRotate();
+	bool editStartScale();
+	bool editCloseCurve();
+	bool editStartAdd();
+	bool editChangeBezierPoint(int direction);
+	bool editRotateBezierPoint(int direction);
+	bool editDeleteBezierPoint();
+	
 	void grab(float FromX, float FromY, float ToX, float ToY);
 	void rotate(float FromX, float FromY, float ToX, float ToY);
 	void scale(float FromX, float FromY, float ToX, float ToY);
@@ -68,9 +92,11 @@ private:
 	GLDrawer* gl;
 	QStatusBar* statusbarMode;
 	QStatusBar* statusbarEdit;
+	QStatusBar* statusbarAction;
+	QTimer* timerAction;
 	Mode mode;
 	
-	bool bView; // false, if view modifying operations are allowed
+	bool bView; // true, if view modifying operations are allowed
 	Edit edit;
 	float iMouse[2], iPos[2];
 };

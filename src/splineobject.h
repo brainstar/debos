@@ -17,8 +17,8 @@ public:
 
 	bool addPoint(float x, float y, float z);
 	
-	void nextInstance();
-	void prevInstance();
+	bool nextInstance();
+	bool prevInstance();
 	void deleteInstance();
 	
 	void addBezierPoint(float *a, float *l, float *r);
